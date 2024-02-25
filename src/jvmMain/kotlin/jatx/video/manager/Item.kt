@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun VideoItem(videoItemEntry: VideoItemEntry) {
-    if (Injector.viewModel.expandedPlaylistName == videoItemEntry.videoEntry.playlistName) {
+    if (Injector.viewModel.expandedPlaylistName == videoItemEntry.videoEntry.playlistName &&
+        Injector.viewModel.expandedYear == videoItemEntry.videoEntry.year) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -27,6 +28,30 @@ fun VideoItem(videoItemEntry: VideoItemEntry) {
         ) {
             Text(
                 text = videoItemEntry.videoEntry.videoName,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+            )
+        }
+    }
+}
+
+@Composable
+fun YearItem(yearItemEntry: YearItemEntry) {
+    if (Injector.viewModel.expandedPlaylistName == yearItemEntry.playlistName) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .background(Color.White)
+                .padding(4.dp)
+                .background(Color.Gray)
+                .padding(20.dp)
+                .clickable {
+                    Injector.viewModel.expandYear(yearItemEntry.year)
+                }
+        ) {
+            Text(
+                text = yearItemEntry.year.toString(),
                 modifier = Modifier
                     .align(Alignment.CenterStart)
             )

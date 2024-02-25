@@ -6,6 +6,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
+import java.text.SimpleDateFormat
 import java.util.*
 
 data class VideoEntry(
@@ -19,8 +20,10 @@ data class VideoEntry(
 ) {
     val url = file.toURI()
         .toString()
-        .cp1251toUTF8()
         .replace("file:/", "file:///")
+
+    val lastModifiedFormatted = lastModified.format()
+    val year = lastModified.year()
 
     override fun toString() = "$url $playlistName $lastModified"
 }
@@ -88,4 +91,33 @@ fun String.parseDuration(): Long {
     duration *= 1000
     duration += ms
     return duration
+}
+
+fun Long.formatDuration(withMs: Boolean = false): String {
+    var duration = this
+    val ms = duration % 1000
+    duration /= 1000
+    val sec = duration % 60
+    duration /= 60
+    val min = duration % 60
+    duration /= 60
+    val hour = duration
+    val msStr = ms.toString().padStart(3, '0')
+    val secStr = sec.toString().padStart(2, '0')
+    val minStr = min.toString().padStart(2, '0')
+    return if (withMs) {
+        "$hour:$minStr:$secStr.$msStr"
+    } else {
+        "$hour:$minStr:$secStr"
+    }
+}
+
+fun Date.format(): String {
+    val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+    return sdf.format(this)
+}
+
+fun Date.year(): Int {
+    val sdf = SimpleDateFormat("yyyy")
+    return sdf.format(this).toInt()
 }

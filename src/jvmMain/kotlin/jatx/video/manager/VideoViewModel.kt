@@ -2,7 +2,6 @@ package jatx.video.manager
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.sun.jna.Native
 import kotlinx.coroutines.CoroutineScope
@@ -29,11 +28,13 @@ class VideoViewModel(
     var currentVideo: VideoEntry? by mutableStateOf(null)
     var currentVideoUrl by mutableStateOf("")
     var currentVideoDuration = 0L
-    var currentVideoProgress by mutableStateOf(0f)
+    var currentVideoProgressPercent by mutableStateOf(0f)
+    var currentVideoProgressMs by mutableStateOf(0L)
 
     var isPlaying by mutableStateOf(false)
 
     var expandedPlaylistName by mutableStateOf("")
+    var expandedYear by mutableStateOf(0)
 
     var isVideoContentsDialogVisible by mutableStateOf(false)
     var currentVideoName by mutableStateOf("")
@@ -102,7 +103,8 @@ class VideoViewModel(
     }
 
     fun onVideoPlayerTimeChanged(newTime: Long) {
-        currentVideoProgress = 1f * newTime / currentVideoDuration
+        currentVideoProgressMs = newTime
+        currentVideoProgressPercent = 1f * newTime / currentVideoDuration
     }
 
     fun onVideoFinished() {
@@ -110,10 +112,18 @@ class VideoViewModel(
     }
 
     fun expandPlaylist(playlistName: String) {
-        if (expandedPlaylistName == playlistName) {
-            expandedPlaylistName = ""
+        expandedPlaylistName = if (expandedPlaylistName == playlistName) {
+            ""
         } else {
-            expandedPlaylistName = playlistName
+            playlistName
+        }
+    }
+
+    fun expandYear(year: Int) {
+        expandedYear = if (expandedYear == year) {
+            0
+        } else {
+            year
         }
     }
 

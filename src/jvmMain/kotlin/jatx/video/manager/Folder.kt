@@ -2,7 +2,7 @@ package jatx.video.manager
 
 import java.io.File
 
-val videoExtensions = listOf("m2ts", "mp4")
+val videoExtensions = listOf("m2ts", "mp4", "avi", "mov")
 
 val File.isVideo: Boolean
     get() = (this.extension.lowercase() in videoExtensions)

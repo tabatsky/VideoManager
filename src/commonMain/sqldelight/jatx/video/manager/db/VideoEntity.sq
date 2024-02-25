@@ -10,7 +10,7 @@ comment TEXT NOT NULL
 CREATE UNIQUE INDEX IF NOT EXISTS the_index ON videoEntity (filePath);
 
 selectAll:
-SELECT * FROM videoEntity ORDER BY (lastModified + id);
+SELECT * FROM videoEntity ORDER BY id;
 
 insertVideo:
 INSERT OR IGNORE INTO videoEntity

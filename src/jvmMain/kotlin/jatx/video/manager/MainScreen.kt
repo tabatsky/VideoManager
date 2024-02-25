@@ -37,7 +37,7 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(10.dp)
         ) {
-            val boxWidthDp = W * 0.75f
+            val boxWidthDp = W * 0.7f
             val boxHeightDp = boxWidthDp * 9f / 16f
 
             Column(
@@ -62,14 +62,31 @@ fun MainScreen(
                         )
                     }
                 }
-                LinearProgressIndicator(
-                    progress = Injector.viewModel.currentVideoProgress,
+                Row(
                     modifier = Modifier
-                        .height(20.dp)
-                        .fillMaxWidth()
-                        .background(Color.Gray),
-                    color = Color.Black
-                )
+                        .height(32.dp)
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = Injector.viewModel.currentVideoProgressMs.formatDuration(),
+                        modifier = Modifier
+                            .padding(4.dp)
+                    )
+                    LinearProgressIndicator(
+                        progress = Injector.viewModel.currentVideoProgressPercent,
+                        modifier = Modifier
+                            .height(20.dp)
+                            .weight(1f)
+                            .background(Color.Gray),
+                        color = Color.Black
+                    )
+                    Text(
+                        text = Injector.viewModel.currentVideoDuration.formatDuration(),
+                        modifier = Modifier
+                            .padding(4.dp)
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -138,10 +155,18 @@ fun MainScreen(
                         .weight(1f)
                 ) {
                     items(Injector.viewModel.allVideos.toItemEntries()) { itemEntry ->
-                        if (itemEntry is VideoItemEntry) {
-                            VideoItem(itemEntry)
-                        } else if (itemEntry is PlaylistItemEntry) {
-                            PlaylistItem(itemEntry)
+                        when (itemEntry) {
+                            is VideoItemEntry -> {
+                                VideoItem(itemEntry)
+                            }
+
+                            is YearItemEntry -> {
+                                YearItem(itemEntry)
+                            }
+
+                            is PlaylistItemEntry -> {
+                                PlaylistItem(itemEntry)
+                            }
                         }
                     }
                 }

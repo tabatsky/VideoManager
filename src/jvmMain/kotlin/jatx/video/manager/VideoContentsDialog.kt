@@ -12,8 +12,9 @@ import androidx.compose.ui.window.DialogWindow
 
 @Composable
 fun VideoContentsDialog() {
+    val onDismiss = { Injector.viewModel.isVideoContentsDialogVisible = false }
     if (Injector.viewModel.isVideoContentsDialogVisible) {
-        DialogWindow(onCloseRequest = { Injector.viewModel.isVideoContentsDialogVisible = false }) {
+        DialogWindow(onCloseRequest = onDismiss) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -30,9 +31,23 @@ fun VideoContentsDialog() {
                     modifier = Modifier
                         .fillMaxWidth()
                 )
+                val lastModified = Injector.viewModel.currentVideo?.lastModifiedFormatted ?: "неизвестно"
+                Text(
+                    text = "Изменено: $lastModified",
+                    modifier = Modifier
+                        .padding(12.dp)
+                )
+                val duration = Injector.viewModel.currentVideo
+                    ?.duration?.formatDuration(true) ?: "неизвестно"
+                Text(
+                    text = "Длительность: $duration",
+                    modifier = Modifier
+                        .padding(12.dp)
+                )
                 Button(
                     onClick = {
                         Injector.viewModel.updateCurrentVideoEntry()
+                        onDismiss()
                     }, modifier = Modifier
                         .fillMaxWidth()
                 ) {
