@@ -16,6 +16,7 @@ data class VideoEntry(
     val playlistName: String,
     val lastModified: Date,
     val duration: Long,
+    var recorded: Date,
     val comment: String = ""
 ) {
     val url = file.toURI()
@@ -23,7 +24,10 @@ data class VideoEntry(
         .replace("file:/", "file:///")
 
     val lastModifiedFormatted = lastModified.format()
-    val year = lastModified.year()
+    val recordedFormatted = recorded.format()
+
+    val actualDate = recorded.takeIf { it.time != 0L } ?: lastModified
+    val year = actualDate.year()
 
     override fun toString() = "$url $playlistName $lastModified"
 }
@@ -37,7 +41,8 @@ fun File.toVideoEntry(playlistName: String): VideoEntry {
         videoName = this.name,
         playlistName = playlistName,
         lastModified = lastModifiedDate,
-        duration = this.duration
+        duration = this.duration,
+        recorded = this.recordedDate
     )
 }
 
@@ -49,6 +54,7 @@ fun VideoEntity.toVideoEntry() = let {
         playlistName = it.playlistName,
         lastModified = Date(it.lastModified),
         duration = duration,
+        recorded = Date(it.recorded),
         comment = it.comment
     )
 }
@@ -61,6 +67,7 @@ fun VideoEntry.toVideoEntity() = let {
         playlistName = it.playlistName,
         lastModified = it.lastModified.time,
         duration = it.duration,
+        recorded = it.recorded.time,
         comment = it.comment
     )
 }
@@ -70,6 +77,18 @@ val File.duration: Long
         val mediaInfo = MediaInfo.mediaInfo(this.absolutePath)
         val video = mediaInfo.first("Video")
         return video.value("Duration").parseDuration()
+    }
+
+val File.recordedDate: Date
+    get() {
+        val mediaInfo = MediaInfo.mediaInfo(this.absolutePath)
+        val general = mediaInfo.first("General")
+        val recordedDateStr = general.value("Recorded date") ?: return Date(0L)
+        val dateStr = recordedDateStr.substring(0, 10)
+        val timeStr = recordedDateStr.substring(12, 20)
+        val formattedDateStr = "$dateStr $timeStr"
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return sdf.parse(formattedDateStr)
     }
 
 fun String.parseDuration(): Long {
@@ -115,6 +134,11 @@ fun Long.formatDuration(withMs: Boolean = false): String {
 fun Date.format(): String {
     val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
     return sdf.format(this)
+}
+
+fun String.tryParseDate(): Date {
+    val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+    return sdf.parse(this)
 }
 
 fun Date.year(): Int {

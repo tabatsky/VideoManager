@@ -1,8 +1,6 @@
 package jatx.video.manager
 
 import jatx.video.manager.db.AppDatabase
-import java.io.File
-import java.util.*
 
 class VideoRepository(
         private val appDatabase: AppDatabase
@@ -25,17 +23,27 @@ class VideoRepository(
                             playlistName = videoEntity.playlistName,
                             lastModified = videoEntity.lastModified,
                             duration = videoEntity.duration,
-                            comment = videoEntity.comment
+                            comment = videoEntity.comment,
+                            recorded = videoEntity.recorded
                     )
     }
 
-    fun updateVideo(videoEntry: VideoEntry) = videoEntry.toVideoEntity().let { videoEntity ->
+    fun updateVideoNameAndComment(videoEntry: VideoEntry) = videoEntry.toVideoEntity().let { videoEntity ->
             appDatabase
                     .videoEntityQueries
-                    .updateVideo(
+                    .updateVideoNameAndComment(
                             videoName = videoEntity.videoName,
                             comment = videoEntity.comment,
                             id = videoEntity.id
                     )
+    }
+
+    fun updateVideoRecordedDate(videoEntry: VideoEntry) = videoEntry.toVideoEntity().let { videoEntity ->
+        appDatabase
+            .videoEntityQueries
+            .updateVideoRecordedDate(
+                recorded = videoEntity.recorded,
+                id = videoEntity.id
+            )
     }
 }

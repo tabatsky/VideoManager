@@ -5,7 +5,8 @@ videoName TEXT NOT NULL,
 playlistName TEXT NOT NULL,
 lastModified INTEGER NOT NULL,
 duration INTEGER NOT NULL,
-comment TEXT NOT NULL
+comment TEXT NOT NULL,
+recorded INTEGER NOT NULL DEFAULT 0
 );
 CREATE UNIQUE INDEX IF NOT EXISTS the_index ON videoEntity (filePath);
 
@@ -14,11 +15,16 @@ SELECT * FROM videoEntity ORDER BY id;
 
 insertVideo:
 INSERT OR IGNORE INTO videoEntity
-(filePath, videoName, playlistName, lastModified, duration, comment)
+(filePath, videoName, playlistName, lastModified, duration, comment, recorded)
 VALUES
-(?, ?, ?, ?, ?, ?);
+(?, ?, ?, ?, ?, ?, ?);
 
-updateVideo:
+updateVideoNameAndComment:
 UPDATE videoEntity SET
 videoName=?, comment=?
+WHERE id=?;
+
+updateVideoRecordedDate:
+UPDATE videoEntity SET
+recorded=?
 WHERE id=?;

@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS videoEntity
+(id INTEGER PRIMARY KEY AUTOINCREMENT,
+filePath TEXT NOT NULL,
+videoName TEXT NOT NULL,
+playlistName TEXT NOT NULL,
+lastModified INTEGER NOT NULL,
+duration INTEGER NOT NULL,
+comment TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS the_index ON videoEntity (filePath);

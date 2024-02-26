@@ -56,6 +56,11 @@ compose.desktop {
 sqldelight {
     database("AppDatabase") {
         packageName = "jatx.video.manager.db"
+        dialect = "sqlite:3.18"
+        schemaOutputDirectory = file("schema")
+        migrationOutputDirectory = file("migrations")
+        deriveSchemaFromMigrations = true
+        verifyMigrations = true
     }
 }
 
