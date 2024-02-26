@@ -43,8 +43,14 @@ class VideoViewModel(
 
     var isAddFolderDialogVisible by mutableStateOf(false)
 
+    var seekProgressMs by mutableStateOf(0L)
+    var needToSeek by mutableStateOf(false)
+
+    init {
+        Native.load("mediainfo", LibMediaInfo::class.java)
+    }
+
     fun onAppStart() {
-        Native.loadLibrary("mediainfo", LibMediaInfo::class.java)
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
                 updateAllVideos()
@@ -53,7 +59,6 @@ class VideoViewModel(
     }
 
     fun onDbUpgraded() {
-        Native.loadLibrary("mediainfo", LibMediaInfo::class.java)
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
                 val allVideosFromDB = videoRepository.getAllVideos()
@@ -156,5 +161,15 @@ class VideoViewModel(
         currentVideoName = currentVideo?.videoName ?: ""
         currentVideoComment = currentVideo?.comment ?: ""
         isVideoContentsDialogVisible = true
+    }
+
+    fun seek(progress: Float) {
+        seekProgressMs = (currentVideoDuration * progress).toLong()
+        needToSeek = true
+    }
+
+    fun seekDone() {
+        seekProgressMs = 0L
+        needToSeek = false
     }
 }

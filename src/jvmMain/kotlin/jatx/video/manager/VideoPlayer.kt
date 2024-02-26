@@ -20,6 +20,9 @@ fun VideoPlayerImpl(
     url: String,
     modifier: Modifier,
     isPlaying: Boolean,
+    seekProgressMs: Long,
+    needToSeek: Boolean,
+    onSeekDone: () -> Unit,
     onTimeChanged: (Long) -> Unit,
     onFinished: () -> Unit
 ) {
@@ -34,6 +37,12 @@ fun VideoPlayerImpl(
             mediaPlayer.controls().play()
         } else {
             mediaPlayer.controls().pause()
+        }
+    }
+    LaunchedEffect(needToSeek) {
+        if (needToSeek) {
+            mediaPlayer.controls().setTime(seekProgressMs)
+            onSeekDone()
         }
     }
     DisposableEffect(Unit) { onDispose(mediaPlayer::release) }

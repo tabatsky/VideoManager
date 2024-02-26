@@ -57,6 +57,9 @@ fun MainScreen(
                             modifier = Modifier
                                 .fillMaxSize(),
                             isPlaying = Injector.viewModel.isPlaying,
+                            seekProgressMs = Injector.viewModel.seekProgressMs,
+                            needToSeek = Injector.viewModel.needToSeek,
+                            onSeekDone = Injector.viewModel::seekDone,
                             onTimeChanged = Injector.viewModel::onVideoPlayerTimeChanged,
                             onFinished = Injector.viewModel::onVideoFinished
                         )
@@ -73,13 +76,17 @@ fun MainScreen(
                         modifier = Modifier
                             .padding(4.dp)
                     )
-                    LinearProgressIndicator(
-                        progress = Injector.viewModel.currentVideoProgressPercent,
+                    Slider(
+                        value = Injector.viewModel.currentVideoProgressPercent,
+                        onValueChange = Injector.viewModel::seek,
                         modifier = Modifier
                             .height(20.dp)
-                            .weight(1f)
-                            .background(Color.Gray),
-                        color = Color.Black
+                            .weight(1f),
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color.Black,
+                            activeTrackColor = Color.Black,
+                            inactiveTickColor = Color.Gray
+                        )
                     )
                     Text(
                         text = Injector.viewModel.currentVideoDuration.formatDuration(),
