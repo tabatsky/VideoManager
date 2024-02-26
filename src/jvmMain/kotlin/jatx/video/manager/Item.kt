@@ -44,7 +44,7 @@ fun YearItem(yearItemEntry: YearItemEntry) {
                 .wrapContentHeight()
                 .background(Color.White)
                 .padding(4.dp)
-                .background(Color.Gray)
+                .background(Color.LightGray)
                 .padding(20.dp)
                 .clickable {
                     Injector.viewModel.expandYear(yearItemEntry.year)
