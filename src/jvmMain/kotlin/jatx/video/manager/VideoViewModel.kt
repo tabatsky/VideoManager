@@ -63,12 +63,16 @@ class VideoViewModel(
             withContext(Dispatchers.IO) {
                 val allVideosFromDB = videoRepository.getAllVideos()
                 allVideosFromDB.forEachIndexed { index, videoEntry ->
-                    val newVideoEntry = videoEntry.file.toVideoEntry(videoEntry.playlistName)
-                    videoRepository.updateVideoRecordedDate(newVideoEntry.copy(id = videoEntry.id))
+                    val newVideoEntry = videoEntry.file
+                        .toVideoEntry(videoEntry.playlistName)
+                        .copy(id = videoEntry.id)
+                    videoRepository.updateVideoRecordedDate(newVideoEntry)
+                    videoRepository.updateVideoCrc32(newVideoEntry)
                     println("updated: ${index + 1} of ${allVideosFromDB.size}")
                     updateAllVideos()
                 }
                 println("updated: all")
+                Injector.confirmDbUpgrade()
             }
         }
     }
@@ -84,11 +88,27 @@ class VideoViewModel(
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
                 val allPaths = videoRepository.getAllVideos().map { it.file.absolutePath }.toSet()
+                val allCrc32 = videoRepository.getAllVideos().associate { it.crc32 to it }
                 val nonDuplicateFolderContents = folderContents.filter { it.absolutePath !in allPaths }
                 nonDuplicateFolderContents.forEachIndexed { index, file ->
-                    videoRepository.insertVideo(videoEntry = file.toVideoEntry(playlistName))
-                    println("inserted: ${index + 1} of ${nonDuplicateFolderContents.size}")
-                    updateAllVideos()
+                    val videoEntry = file.toVideoEntry(playlistName)
+                    if (allCrc32.keys.contains(videoEntry.crc32)) {
+                        val existingVideoEntry = allCrc32[videoEntry.crc32]!!
+                        val existingPath = existingVideoEntry.file.absolutePath
+                        val newPath = file.absolutePath
+                        if (existingVideoEntry.file.exists()) {
+                            println("duplicate found:\n$existingPath\n$newPath")
+                        } else {
+                            val newVideoEntry = existingVideoEntry.copy(file = file)
+                            videoRepository.updateVideoFilePath(newVideoEntry)
+                            println("file replaced:\n$existingPath\n$newPath")
+                            updateAllVideos()
+                        }
+                    } else {
+                        videoRepository.insertVideo(videoEntry = videoEntry)
+                        println("inserted: ${index + 1} of ${nonDuplicateFolderContents.size}")
+                        updateAllVideos()
+                    }
                 }
                 println("inserted: all")
             }

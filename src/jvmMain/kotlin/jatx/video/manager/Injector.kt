@@ -23,6 +23,16 @@ class Injector(
         val viewModel: VideoViewModel
             get() = INSTANCE.viewModel
 
+        fun confirmDbUpgrade() {
+            val newVersion = AppDatabase.Schema.version
+
+            INSTANCE.driver
+                .execute(
+                    sql = "PRAGMA user_version = $newVersion",
+                    identifier = null,
+                    parameters = 0)
+        }
+
         fun init(
             databaseDriverFactory: DatabaseDriverFactory,
             coroutineScope: CoroutineScope

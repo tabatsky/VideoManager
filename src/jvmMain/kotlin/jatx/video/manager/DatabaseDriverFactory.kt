@@ -37,11 +37,6 @@ class DatabaseDriverFactory {
             } catch (t: Throwable) {
                 t.printStackTrace()
             }
-            driver
-                .execute(
-                    sql = "PRAGMA user_version = $newVersion",
-                    identifier = null,
-                    parameters = 0)
         }
         return driver
     }

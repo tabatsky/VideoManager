@@ -8,6 +8,7 @@ import java.nio.file.Paths
 import java.nio.file.attribute.BasicFileAttributes
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.zip.CRC32
 
 data class VideoEntry(
     val id: Long = 0,
@@ -17,6 +18,7 @@ data class VideoEntry(
     val lastModified: Date,
     val duration: Long,
     var recorded: Date,
+    val crc32: Long,
     val comment: String = ""
 ) {
     val url = file.toURI()
@@ -42,7 +44,8 @@ fun File.toVideoEntry(playlistName: String): VideoEntry {
         playlistName = playlistName,
         lastModified = lastModifiedDate,
         duration = this.duration,
-        recorded = this.recordedDate
+        recorded = this.recordedDate,
+        crc32 = this.calculateCRC32()
     )
 }
 
@@ -55,6 +58,7 @@ fun VideoEntity.toVideoEntry() = let {
         lastModified = Date(it.lastModified),
         duration = duration,
         recorded = Date(it.recorded),
+        crc32 = it.crc32,
         comment = it.comment
     )
 }
@@ -68,6 +72,7 @@ fun VideoEntry.toVideoEntity() = let {
         lastModified = it.lastModified.time,
         duration = it.duration,
         recorded = it.recorded.time,
+        crc32 = it.crc32,
         comment = it.comment
     )
 }
@@ -144,4 +149,10 @@ fun String.tryParseDate(): Date {
 fun Date.year(): Int {
     val sdf = SimpleDateFormat("yyyy")
     return sdf.format(this).toInt()
+}
+
+fun File.calculateCRC32(): Long {
+    val crc32Calculator = CRC32()
+    crc32Calculator.update(this.readBytes())
+    return crc32Calculator.value
 }

@@ -6,7 +6,8 @@ playlistName TEXT NOT NULL,
 lastModified INTEGER NOT NULL,
 duration INTEGER NOT NULL,
 comment TEXT NOT NULL,
-recorded INTEGER NOT NULL DEFAULT 0
+recorded INTEGER NOT NULL DEFAULT 0,
+crc32 INTEGER NOT NULL DEFAULT 0
 );
 CREATE UNIQUE INDEX IF NOT EXISTS the_index ON videoEntity (filePath);
 
@@ -27,4 +28,14 @@ WHERE id=?;
 updateVideoRecordedDate:
 UPDATE videoEntity SET
 recorded=?
+WHERE id=?;
+
+updateVideoCrc32:
+UPDATE videoEntity SET
+crc32=?
+WHERE id=?;
+
+updateVideoFilePath:
+UPDATE videoEntity SET
+filePath=?
 WHERE id=?;

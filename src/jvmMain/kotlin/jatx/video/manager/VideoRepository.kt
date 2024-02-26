@@ -46,4 +46,22 @@ class VideoRepository(
                 id = videoEntity.id
             )
     }
+
+    fun updateVideoCrc32(videoEntry: VideoEntry) = videoEntry.toVideoEntity().let { videoEntity ->
+        appDatabase
+            .videoEntityQueries
+            .updateVideoCrc32(
+                crc32 = videoEntity.crc32,
+                id = videoEntity.id
+            )
+    }
+
+    fun updateVideoFilePath(videoEntry: VideoEntry) = videoEntry.toVideoEntity().let { videoEntity ->
+        appDatabase
+            .videoEntityQueries
+            .updateVideoFilePath(
+                filePath = videoEntity.filePath,
+                id = videoEntity.id
+            )
+    }
 }
