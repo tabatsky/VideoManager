@@ -66,7 +66,13 @@ class VideoViewModel(
                 allVideosFromDB.forEachIndexed { index, videoEntry ->
                     val newVideoEntry = videoEntry.file
                         .toVideoEntry(videoEntry.playlistName)
-                        .copy(id = videoEntry.id)
+                        .copy(id = videoEntry.id).let {
+                            if (videoEntry.recorded.time > 0L) {
+                                it.copy(recorded = videoEntry.recorded)
+                            } else {
+                                it
+                            }
+                        }
                     videoRepository.updateVideoRecordedDate(newVideoEntry)
                     videoRepository.updateVideoCrc32(newVideoEntry)
                     println("updated: ${index + 1} of ${allVideosFromDB.size}")
