@@ -78,9 +78,11 @@ class VideoViewModel(
     fun addCurrentFolderContents() {
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
-                folderContents.forEachIndexed { index, file ->
+                val allPaths = videoRepository.getAllVideos().map { it.file.absolutePath }.toSet()
+                val nonDuplicateFolderContents = folderContents.filter { it.absolutePath !in allPaths }
+                nonDuplicateFolderContents.forEachIndexed { index, file ->
                     videoRepository.insertVideo(videoEntry = file.toVideoEntry(playlistName))
-                    println("inserted: ${index + 1} of ${folderContents.size}")
+                    println("inserted: ${index + 1} of ${nonDuplicateFolderContents.size}")
                     updateAllVideos()
                 }
                 println("inserted: all")
