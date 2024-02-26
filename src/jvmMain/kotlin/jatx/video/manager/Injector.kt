@@ -10,7 +10,8 @@ class Injector(
     private val driver = databaseDriverFactory.createDriver()
     private val appDatabase = AppDatabase.invoke(driver)
     private val videoRepository = VideoRepository(appDatabase)
-    private val viewModel = VideoViewModel(videoRepository, coroutineScope).also {
+    private val settings = Settings().also { it.loadSettings() }
+    private val viewModel = VideoViewModel(videoRepository, settings, coroutineScope).also {
         if (databaseDriverFactory.wasUpgraded) {
             println("db was upgraded")
             it.onDbUpgraded()
@@ -22,6 +23,9 @@ class Injector(
 
         val viewModel: VideoViewModel
             get() = INSTANCE.viewModel
+
+        val settings: Settings
+            get() = INSTANCE.settings
 
         fun confirmDbUpgrade() {
             val newVersion = AppDatabase.Schema.version

@@ -38,6 +38,7 @@ private fun WindowScope.FolderChooserDialog(
     DisposableEffect(showCounter) {
         val job = coroutineScope.launch {
             val fileChooser = JFileChooser()
+            fileChooser.currentDirectory = File(Injector.settings.lastDirPath)
             fileChooser.dialogTitle = "Открыть папку"
             fileChooser.isMultiSelectionEnabled = false
             fileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY

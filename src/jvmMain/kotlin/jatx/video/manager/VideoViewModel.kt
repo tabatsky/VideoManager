@@ -14,6 +14,7 @@ import java.util.*
 
 class VideoViewModel(
     private val videoRepository: VideoRepository,
+    private val settings: Settings,
     private val coroutineScope: CoroutineScope
 ) {
     var playlistName by mutableStateOf("")
@@ -78,6 +79,8 @@ class VideoViewModel(
     }
 
     fun chooseFolder(dir: File) {
+        settings.lastDirPath = dir.absolutePath
+        settings.saveSettings()
         folderPath = dir.absolutePath
         playlistName = dir.name
         folderContents = scanVideoDir(dir)
