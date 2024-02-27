@@ -4,10 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.sun.jna.Native
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import uk.co.caprica.vlcjinfo.binding.LibMediaInfo
 import java.io.File
 import java.util.*
@@ -51,33 +48,38 @@ class VideoViewModel(
 
     fun onAppStart() {
         coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                updateAllVideos()
-            }
+            updateAllVideos()
         }
     }
 
-    fun onDbUpgraded() {
+    fun onDbUpgraded(onSuccess: () -> Unit) {
         coroutineScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
                 val allVideosFromDB = videoRepository.getAllVideos()
-                allVideosFromDB.forEachIndexed { index, videoEntry ->
-                    val newVideoEntry = videoEntry.file
-                        .toVideoEntry(videoEntry.playlistName)
-                        .copy(id = videoEntry.id).let {
-                            if (videoEntry.recorded.time > 0L) {
-                                it.copy(recorded = videoEntry.recorded)
-                            } else {
-                                it
+                val allVideosIterator = allVideosFromDB.iterator()
+                var index = 0
+                while (allVideosIterator.hasNext()) {
+                    val videoEntry = allVideosIterator.next()
+                    val newVideoEntry = withContext(Dispatchers.IO) {
+                        videoEntry.file
+                            .toVideoEntry(videoEntry.playlistName)
+                            .copy(id = videoEntry.id).let {
+                                if (videoEntry.recorded.time > 0L) {
+                                    it.copy(recorded = videoEntry.recorded)
+                                } else {
+                                    it
+                                }
                             }
-                        }
+                    }
                     videoRepository.updateVideoRecordedDate(newVideoEntry)
                     videoRepository.updateVideoCrc32(newVideoEntry)
                     println("updated: ${index + 1} of ${allVideosFromDB.size}")
+                    index += 1
                     updateAllVideos()
                 }
                 println("updated: all")
                 Injector.confirmDbUpgrade()
+                onSuccess()
             }
         }
     }
@@ -93,12 +95,14 @@ class VideoViewModel(
 
     fun addCurrentFolderContents() {
         coroutineScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
                 val allPaths = videoRepository.getAllVideos().map { it.file.absolutePath }.toSet()
                 val allCrc32 = videoRepository.getAllVideos().associate { it.crc32 to it }
                 val nonDuplicateFolderContents = folderContents.filter { it.absolutePath !in allPaths }
                 nonDuplicateFolderContents.forEachIndexed { index, file ->
-                    val videoEntry = file.toVideoEntry(playlistName)
+                    val videoEntry = withContext(Dispatchers.IO) {
+                        file.toVideoEntry(playlistName)
+                    }
                     if (allCrc32.keys.contains(videoEntry.crc32)) {
                         val existingVideoEntry = allCrc32[videoEntry.crc32]!!
                         val existingPath = existingVideoEntry.file.absolutePath
