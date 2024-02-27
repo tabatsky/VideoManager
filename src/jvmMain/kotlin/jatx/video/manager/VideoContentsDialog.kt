@@ -31,6 +31,11 @@ fun VideoContentsDialog() {
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
+                Text(
+                    text = "Τΰιλ: ${Injector.viewModel.currentVideo?.file?.absolutePath}",
+                    modifier = Modifier
+                        .padding(12.dp)
+                )
                 TextField(
                     value = videoName,
                     onValueChange = { videoName = it },
