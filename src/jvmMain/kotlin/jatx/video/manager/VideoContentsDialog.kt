@@ -16,7 +16,11 @@ import androidx.compose.ui.window.rememberDialogState
 @Composable
 fun VideoContentsDialog() {
     val onDismiss = { Injector.viewModel.isVideoContentsDialogVisible = false }
+
     if (Injector.viewModel.isVideoContentsDialogVisible) {
+        var videoName by remember { mutableStateOf(Injector.viewModel.currentVideo?.videoName ?: "") }
+        var comment by remember { mutableStateOf(Injector.viewModel.currentVideo?.comment ?: "") }
+
         val dialogState = rememberDialogState(width = 400.dp, height = 450.dp)
 
         DialogWindow(
@@ -28,14 +32,14 @@ fun VideoContentsDialog() {
                     .fillMaxWidth()
             ) {
                 TextField(
-                    value = Injector.viewModel.currentVideoName,
-                    onValueChange = { Injector.viewModel.currentVideoName = it },
+                    value = videoName,
+                    onValueChange = { videoName = it },
                     modifier = Modifier
                         .fillMaxWidth()
                 )
                 TextField(
-                    value = Injector.viewModel.currentVideoComment,
-                    onValueChange = { Injector.viewModel.currentVideoComment = it },
+                    value = comment,
+                    onValueChange = { comment = it },
                     modifier = Modifier
                         .fillMaxWidth()
                 )
@@ -79,7 +83,11 @@ fun VideoContentsDialog() {
                     onClick = {
                         try {
                             val newRecordedDate = recordedTextFieldValue.tryParseDate()
-                            Injector.viewModel.updateCurrentVideoEntry(newRecordedDate)
+                            Injector.viewModel.updateCurrentVideoEntry(
+                                newRecordedDate = newRecordedDate,
+                                newVideoName = videoName,
+                                newComment = comment
+                            )
                             onDismiss()
                         } catch (e: Exception) {
                             isParseError = true

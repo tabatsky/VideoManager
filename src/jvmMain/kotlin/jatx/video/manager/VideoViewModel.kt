@@ -19,7 +19,7 @@ class VideoViewModel(
 ) {
     var playlistName by mutableStateOf("")
     var folderPath by mutableStateOf("")
-    var folderContents by mutableStateOf(listOf<File>())
+    private var folderContents by mutableStateOf(listOf<File>())
     var folderVideoCount by mutableStateOf(0)
 
     var needShowFolderChooserDialog by mutableStateOf(false)
@@ -39,8 +39,6 @@ class VideoViewModel(
     var expandedYear by mutableStateOf(0)
 
     var isVideoContentsDialogVisible by mutableStateOf(false)
-    var currentVideoName by mutableStateOf("")
-    var currentVideoComment by mutableStateOf("")
 
     var isAddFolderDialogVisible by mutableStateOf(false)
 
@@ -134,7 +132,6 @@ class VideoViewModel(
         println("actual date: ${videoEntry.actualDate}")
         currentVideo = videoEntry
         currentVideoDuration = videoEntry.duration
-        currentVideoName = videoEntry.videoName
         currentVideoUrl = videoEntry.url
         play()
     }
@@ -147,11 +144,11 @@ class VideoViewModel(
         isPlaying = false
     }
 
-    fun updateCurrentVideoEntry(newRecordedDate: Date) {
+    fun updateCurrentVideoEntry(newRecordedDate: Date, newVideoName: String, newComment: String) {
         currentVideo?.let {
             val newVideoEntry = it.copy(
-                videoName = currentVideoName,
-                comment = currentVideoComment,
+                videoName = newVideoName,
+                comment = newComment,
                 recorded = newRecordedDate
             )
             videoRepository.updateVideoNameAndComment(newVideoEntry)
@@ -187,8 +184,6 @@ class VideoViewModel(
     }
 
     fun showVideoContentsDialog() {
-        currentVideoName = currentVideo?.videoName ?: ""
-        currentVideoComment = currentVideo?.comment ?: ""
         isVideoContentsDialogVisible = true
     }
 

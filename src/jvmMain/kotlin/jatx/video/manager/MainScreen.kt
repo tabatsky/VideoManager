@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import jatx.videomanager.generated.resources.Res
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -29,7 +30,6 @@ fun MainScreen(
         AddFolderDialog(
             onChooseFolder = onChooseFolder
         )
-
         VideoContentsDialog()
 
         Row(
@@ -45,147 +45,167 @@ fun MainScreen(
                     .width(boxWidthDp)
                     .fillMaxHeight()
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(boxHeightDp)
-                        .background(Color.Gray)
-                ) {
-                    if (Injector.viewModel.currentVideoUrl.isNotEmpty()) {
-                        VideoPlayerImpl(
-                            url = Injector.viewModel.currentVideoUrl,
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            isPlaying = Injector.viewModel.isPlaying,
-                            seekProgressMs = Injector.viewModel.seekProgressMs,
-                            needToSeek = Injector.viewModel.needToSeek,
-                            onSeekDone = Injector.viewModel::seekDone,
-                            onTimeChanged = Injector.viewModel::onVideoPlayerTimeChanged,
-                            onFinished = Injector.viewModel::onVideoFinished
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .height(32.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = Injector.viewModel.currentVideoProgressMs.formatDuration(),
-                        modifier = Modifier
-                            .padding(4.dp)
-                    )
-                    Slider(
-                        value = Injector.viewModel.currentVideoProgressPercent,
-                        onValueChange = Injector.viewModel::seek,
-                        modifier = Modifier
-                            .height(20.dp)
-                            .weight(1f),
-                        colors = SliderDefaults.colors(
-                            thumbColor = Color.Black,
-                            activeTrackColor = Color.Black,
-                            inactiveTickColor = Color.Gray
-                        )
-                    )
-                    Text(
-                        text = Injector.viewModel.currentVideoDuration.formatDuration(),
-                        modifier = Modifier
-                            .padding(4.dp)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                    ) {
-                        if (!Injector.viewModel.isPlaying) {
-                            IconButton(
-                                onClick = {
-                                    Injector.viewModel.play()
-                                },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(Res.drawable.ic_play),
-                                    contentDescription = null
-                                )
-                            }
-                        } else {
-                            IconButton(
-                                onClick = {
-                                    Injector.viewModel.pause()
-                                },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(Res.drawable.ic_pause),
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                    }
-                    TextField(
-                        value = Injector.viewModel.currentVideo?.videoName ?: "",
-                        onValueChange = {  },
-                        modifier = Modifier
-                            .weight(1f)
-                    )
-                    Button(onClick = {
-                        Injector.viewModel.showVideoContentsDialog()
-                    }, modifier = Modifier
-                        .width(160.dp)
-                        .padding(20.dp)
-                    ) {
-                        Text("Подробнее")
-                    }
-                }
+                VideoBox(boxHeightDp)
+                SliderRow()
+                ControlsAndInfoRow()
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f)
-                    .padding(10.dp)
-            ) {
-                LazyColumn (
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    items(Injector.viewModel.allVideos.toItemEntries()) { itemEntry ->
-                        when (itemEntry) {
-                            is VideoItemEntry -> {
-                                VideoItem(itemEntry)
-                            }
-
-                            is YearItemEntry -> {
-                                YearItem(itemEntry)
-                            }
-
-                            is PlaylistItemEntry -> {
-                                PlaylistItem(itemEntry)
-                            }
-                        }
-                    }
-                }
-                Button(onClick = {
-                    Injector.viewModel.isAddFolderDialogVisible = true
-                }, modifier = Modifier
-                    .fillMaxWidth()
-                ) {
-                    Text("Добавить папку")
-                }
-            }
+            VideoListColumn()
         }
     }
 }
 
+@Composable
+private fun VideoBox(boxHeightDp: Dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(boxHeightDp)
+            .background(Color.Gray)
+    ) {
+        if (Injector.viewModel.currentVideoUrl.isNotEmpty()) {
+            VideoPlayerImpl(
+                url = Injector.viewModel.currentVideoUrl,
+                modifier = Modifier
+                    .fillMaxSize(),
+                isPlaying = Injector.viewModel.isPlaying,
+                seekProgressMs = Injector.viewModel.seekProgressMs,
+                needToSeek = Injector.viewModel.needToSeek,
+                onSeekDone = Injector.viewModel::seekDone,
+                onTimeChanged = Injector.viewModel::onVideoPlayerTimeChanged,
+                onFinished = Injector.viewModel::onVideoFinished
+            )
+        }
+    }
+}
+
+@Composable
+private fun SliderRow() {
+    Row(
+        modifier = Modifier
+            .height(32.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = Injector.viewModel.currentVideoProgressMs.formatDuration(),
+            modifier = Modifier
+                .padding(4.dp)
+        )
+        Slider(
+            value = Injector.viewModel.currentVideoProgressPercent,
+            onValueChange = Injector.viewModel::seek,
+            modifier = Modifier
+                .height(20.dp)
+                .weight(1f),
+            colors = SliderDefaults.colors(
+                thumbColor = Color.Black,
+                activeTrackColor = Color.Black,
+                inactiveTickColor = Color.Gray
+            )
+        )
+        Text(
+            text = Injector.viewModel.currentVideoDuration.formatDuration(),
+            modifier = Modifier
+                .padding(4.dp)
+        )
+    }
+}
+
+@OptIn(ExperimentalResourceApi::class)
+@Composable
+private fun ColumnScope.ControlsAndInfoRow() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+        ) {
+            if (!Injector.viewModel.isPlaying) {
+                IconButton(
+                    onClick = {
+                        Injector.viewModel.play()
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_play),
+                        contentDescription = null
+                    )
+                }
+            } else {
+                IconButton(
+                    onClick = {
+                        Injector.viewModel.pause()
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.ic_pause),
+                        contentDescription = null
+                    )
+                }
+            }
+        }
+        TextField(
+            value = Injector.viewModel.currentVideo?.videoName ?: "",
+            onValueChange = {  },
+            modifier = Modifier
+                .weight(1f)
+        )
+        Button(onClick = {
+            Injector.viewModel.showVideoContentsDialog()
+        }, modifier = Modifier
+            .width(160.dp)
+            .padding(20.dp)
+        ) {
+            Text("Подробнее")
+        }
+    }
+}
+
+@Composable
+private fun RowScope.VideoListColumn() {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .weight(1f)
+            .padding(10.dp)
+    ) {
+        LazyColumn (
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            items(Injector.viewModel.allVideos.toItemEntries()) { itemEntry ->
+                when (itemEntry) {
+                    is VideoItemEntry -> {
+                        VideoItem(itemEntry)
+                    }
+
+                    is YearItemEntry -> {
+                        YearItem(itemEntry)
+                    }
+
+                    is PlaylistItemEntry -> {
+                        PlaylistItem(itemEntry)
+                    }
+                }
+            }
+        }
+        Button(onClick = {
+            Injector.viewModel.isAddFolderDialogVisible = true
+        }, modifier = Modifier
+            .fillMaxWidth()
+        ) {
+            Text("Добавить папку")
+        }
+    }
+}
