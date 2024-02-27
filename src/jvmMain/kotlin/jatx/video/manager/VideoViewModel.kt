@@ -1,8 +1,11 @@
 package jatx.video.manager
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.loadImageBitmap
 import com.sun.jna.Native
 import kotlinx.coroutines.*
 import uk.co.caprica.vlcjinfo.binding.LibMediaInfo
@@ -42,6 +45,8 @@ class VideoViewModel(
     var seekProgressMs by mutableStateOf(0L)
     var needToSeek by mutableStateOf(false)
 
+    var thumbnails = mutableStateMapOf<Long, ImageBitmap>()
+
     init {
         Native.load("mediainfo", LibMediaInfo::class.java)
     }
@@ -49,7 +54,21 @@ class VideoViewModel(
     fun onAppStart() {
         coroutineScope.launch {
             updateAllVideos()
+            withContext(Dispatchers.IO) {
+                makeThumbnails()
+            }
         }
+    }
+
+    private fun makeThumbnails() {
+        allVideos.sortedBy { it.id }.forEach {
+            ThumbnailMaker.makeThumbnail(it) { videoEntry, pngFile ->
+                val bitmap = loadImageBitmap(pngFile.inputStream())
+                thumbnails[videoEntry.id] = bitmap
+                println("thumbnail loaded: ${pngFile.name}")
+            }
+        }
+        println("all thumbnails loaded")
     }
 
     fun onDbUpgraded(onSuccess: () -> Unit) {

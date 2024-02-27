@@ -1,11 +1,9 @@
 package jatx.video.manager
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,16 +19,35 @@ fun VideoItem(videoItemEntry: VideoItemEntry) {
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(12.dp)
+                .padding(8.dp)
                 .clickable {
                     Injector.viewModel.playVideoEntry(videoItemEntry.videoEntry)
                 }
         ) {
-            Text(
-                text = videoItemEntry.videoEntry.videoName,
+            Row(
                 modifier = Modifier
-                    .align(Alignment.CenterStart)
-            )
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val thumbnailPngFile = Injector.viewModel
+                    .thumbnails[videoItemEntry.videoEntry.id]
+                thumbnailPngFile?.let {
+                    Image(
+                        bitmap = it,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(64.dp)
+                            .height(36.dp)
+                    )
+                }
+                Text(
+                    text = videoItemEntry.videoEntry.videoName,
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentHeight()
+                        .padding(12.dp)
+                )
+            }
         }
     }
 }
