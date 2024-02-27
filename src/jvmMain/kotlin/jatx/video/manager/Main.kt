@@ -5,14 +5,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.*
 
 fun main() = application {
-        val factory = DatabaseDriverFactory()
-        Injector.init(factory, rememberCoroutineScope())
-        Injector.viewModel.onAppStart()
+    val factory = DatabaseDriverFactory()
+    Injector.init(factory, rememberCoroutineScope())
 
     val windowState = rememberWindowState(placement = WindowPlacement.Maximized)
 
     Window(
-        onCloseRequest = ::exitApplication,
+        onCloseRequest = {
+            Injector.clean()
+            exitApplication()
+        },
         state = windowState
     ) {
         FolderChooserDialogWrapper(

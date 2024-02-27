@@ -56,22 +56,18 @@ class VideoViewModel(
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
                 val allVideosFromDB = videoRepository.getAllVideos()
-                val allVideosIterator = allVideosFromDB.iterator()
+                val allVideosIterator = allVideosFromDB.sortedBy { it.file.absolutePath }.iterator()
                 var index = 0
                 while (allVideosIterator.hasNext()) {
                     val videoEntry = allVideosIterator.next()
                     val newVideoEntry = withContext(Dispatchers.IO) {
                         videoEntry.file
                             .toVideoEntry(videoEntry.playlistName)
-                            .copy(id = videoEntry.id).let {
-                                if (videoEntry.recorded.time > 0L) {
-                                    it.copy(recorded = videoEntry.recorded)
-                                } else {
-                                    it
-                                }
-                            }
+                            .copy(id = videoEntry.id)
                     }
-                    videoRepository.updateVideoRecordedDate(newVideoEntry)
+                    if (newVideoEntry.recorded.year() > 2012) {
+                        videoRepository.updateVideoRecordedDate(newVideoEntry)
+                    }
                     videoRepository.updateVideoCrc32(newVideoEntry)
                     println("updated: ${index + 1} of ${allVideosFromDB.size}")
                     index += 1

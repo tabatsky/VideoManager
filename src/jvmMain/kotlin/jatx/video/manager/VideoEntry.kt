@@ -89,11 +89,14 @@ val File.recordedDate: Date
         val mediaInfo = MediaInfo.mediaInfo(this.absolutePath)
         val general = mediaInfo.first("General")
         val recordedDateStr = general.value("Recorded date") ?: return Date(0L)
+        println(recordedDateStr)
         val dateStr = recordedDateStr.substring(0, 10)
         val timeStr = recordedDateStr.substring(12, 20)
+        val zoneDelta = 1000L * 3600 * 10
         val formattedDateStr = "$dateStr $timeStr"
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        return sdf.parse(formattedDateStr)
+        val time = sdf.parse(formattedDateStr).time
+        return Date(time + zoneDelta)
     }
 
 fun String.parseDuration(): Long {
