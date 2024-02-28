@@ -1,9 +1,6 @@
 package jatx.video.manager
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.loadImageBitmap
 import com.sun.jna.Native
@@ -29,7 +26,7 @@ class VideoViewModel(
 
     var currentVideo: VideoEntry? by mutableStateOf(null)
     var currentVideoUrl by mutableStateOf("")
-    var currentVideoDuration = 0L
+    val currentVideoDuration by derivedStateOf { currentVideo?.duration ?: 0L }
     var currentVideoProgressPercent by mutableStateOf(0f)
     var currentVideoProgressMs by mutableStateOf(0L)
 
@@ -199,7 +196,6 @@ class VideoViewModel(
         println("duration: ${videoEntry.duration}")
         println("actual date: ${videoEntry.actualDate}")
         currentVideo = videoEntry
-        currentVideoDuration = videoEntry.duration
         currentVideoUrl = videoEntry.url
         play()
     }
