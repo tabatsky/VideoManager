@@ -36,6 +36,9 @@ kotlin {
                 implementation("uk.co.caprica:vlcj:4.7.0")
                 implementation("uk.co.caprica:vlcj-info:2.0.3")
                 implementation("com.squareup.sqldelight:sqlite-driver:1.5.5")
+                implementation("com.google.api-client:google-api-client:1.23.0")
+                implementation("com.google.oauth-client:google-oauth-client-jetty:1.23.0")
+                implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
             }
         }
         val jvmTest by getting

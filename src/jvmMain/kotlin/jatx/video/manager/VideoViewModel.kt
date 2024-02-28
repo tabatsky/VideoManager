@@ -10,6 +10,7 @@ import com.sun.jna.Native
 import kotlinx.coroutines.*
 import uk.co.caprica.vlcjinfo.binding.LibMediaInfo
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 
 class VideoViewModel(
@@ -53,9 +54,33 @@ class VideoViewModel(
 
     fun onAppStart() {
         coroutineScope.launch {
+            fetchYoutubeData()
             updateAllVideos()
             withContext(Dispatchers.IO) {
                 makeThumbnails()
+            }
+        }
+    }
+
+    private fun fetchYoutubeData() {
+        val youtubeData = YoutubeAPI.tryFetchVideos("VideoCamera")
+        val videoEntryNames = videoRepository.getAllVideos().associate { it.file.name to it.videoName }
+        youtubeData.forEach {
+            val videoTitle = it.second
+            val sdfParse = SimpleDateFormat("yyyy MM dd HH mm ss")
+            try {
+                val date = sdfParse.parse(videoTitle)
+                val sdfFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
+                val formattedDate = sdfFormat.format(date)
+                val fileName = "$formattedDate.m2ts"
+                if (fileName in videoEntryNames.keys) {
+                    val videoName = videoEntryNames[fileName]!!
+                    println("video: $videoTitle; $videoName")
+                } else {
+                    println("video not found in local DB: $videoTitle")
+                }
+            } catch (e: Exception) {
+                println("wrong video title: $videoTitle")
             }
         }
     }
@@ -65,7 +90,7 @@ class VideoViewModel(
             ThumbnailMaker.makeThumbnail(it) { videoEntry, pngFile ->
                 val bitmap = loadImageBitmap(pngFile.inputStream())
                 thumbnails[videoEntry.id] = bitmap
-                println("thumbnail loaded: ${pngFile.name}")
+                //println("thumbnail loaded: ${pngFile.name}")
             }
         }
         println("all thumbnails loaded")
