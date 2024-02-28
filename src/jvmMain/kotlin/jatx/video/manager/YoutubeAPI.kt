@@ -23,8 +23,12 @@ const val CLIENT_SECRETS = "client_secret.json"
 const val APPLICATION_NAME = "VideoManager"
 
 object YoutubeAPI {
-    private val SCOPES: Collection<String> = mutableListOf("https://www.googleapis.com/auth/youtube.readonly")
+    private val SCOPES: Collection<String> = mutableListOf("https://www.googleapis.com/auth/youtube")
     private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
+
+    private val youtubeService by lazy {
+        getService()
+    }
 
     @Throws(IOException::class)
     fun authorize(httpTransport: NetHttpTransport?): Credential? {
@@ -54,39 +58,91 @@ object YoutubeAPI {
     }
 
     @Throws(GeneralSecurityException::class, IOException::class, GoogleJsonResponseException::class)
-    fun tryFetchVideos(playlistNameToFetch: String): List<Pair<String, String>> {
-        val result = arrayListOf<Pair<String, String>>()
+    fun tryFetchPlaylistVideos(playlistNameToFetch: String): List<YoutubeVideo> {
+        val result = arrayListOf<YoutubeVideo>()
 
-        val youtubeService = getService()
-        // Define and execute the API request
-        val request = youtubeService!!.playlists()
-            .list("snippet,contentDetails")
-        val response = request.setMine(true).execute()
-        response.items.forEach { playlist ->
-            val playlistId = playlist.id
-            val playlistTitle = playlist.snippet.title
-            println("playlist: $playlistId; $playlistTitle")
-            if (playlistTitle == playlistNameToFetch) {
-                var nextPageToken: String? = null
-                do {
-                    val request2 = youtubeService.playlistItems().list("snippet,contentDetails")
-                    val response2 = if (nextPageToken == null) {
-                        request2.setPlaylistId(playlistId).setMaxResults(50L).execute()
-                    } else {
-                        request2.setPlaylistId(playlistId).setMaxResults(50L).setPageToken(nextPageToken).execute()
-                    }
-                    response2.items.forEach { playlistItem ->
-                        val videoId = playlistItem.contentDetails.videoId
-                        val videoTitle = playlistItem.snippet.title
-                        println("video: $videoId; $videoTitle")
-                        result.add(videoId to videoTitle)
-                    }
-                    nextPageToken = response2.nextPageToken
-                    println(nextPageToken)
-                } while (nextPageToken != null)
+        youtubeService?.let { theYoutubeService ->
+            // Define and execute the API request
+            val request = theYoutubeService.playlists()
+                .list("snippet,contentDetails")
+            val response = request.setMine(true).execute()
+            response.items.forEach { playlist ->
+                val playlistId = playlist.id
+                val playlistTitle = playlist.snippet.title
+                println("playlist: $playlistId; $playlistTitle")
+                if (playlistTitle == playlistNameToFetch) {
+                    var nextPageToken: String? = null
+                    do {
+                        val request2 = theYoutubeService.playlistItems().list("snippet,contentDetails")
+                        val response2 = if (nextPageToken == null) {
+                            request2.setPlaylistId(playlistId).setMaxResults(50L).execute()
+                        } else {
+                            request2.setPlaylistId(playlistId).setMaxResults(50L).setPageToken(nextPageToken).execute()
+                        }
+                        val videoIds = response2.items.map { playlistItem ->
+                            playlistItem.contentDetails.videoId
+                        }
+                        val fetchedVideos = tryFetchVideos(videoIds)
+                        result.addAll(fetchedVideos)
+                        nextPageToken = response2.nextPageToken
+                        println(nextPageToken)
+                    } while (nextPageToken != null)
+                }
             }
         }
 
         return result
     }
+
+    @Throws(GeneralSecurityException::class, IOException::class, GoogleJsonResponseException::class)
+    private fun tryFetchVideos(videoIds: List<String>): List<YoutubeVideo> {
+        val result = arrayListOf<YoutubeVideo>()
+        val videoIdsStr = videoIds.joinToString(",")
+
+        youtubeService?.let { theYoutubeService ->
+            var nextPageToken: String? = null
+            do {
+                val request = theYoutubeService.Videos().list("snippet,fileDetails")
+                val response = request.setId(videoIdsStr).setMaxResults(50L).setPageToken(nextPageToken).execute()
+
+                response.items.forEach { video ->
+                    val videoId = video.id
+                    val videoTitle = video.snippet.title
+                    val videoFileName = video.fileDetails.fileName
+                    println("video: $videoId; $videoFileName; $videoTitle")
+                    val youtubeVideo = YoutubeVideo(
+                        id = videoId,
+                        fileName = videoFileName,
+                        title = videoTitle
+                    )
+                    result.add(youtubeVideo)
+                }
+
+                nextPageToken = response.nextPageToken
+            } while (nextPageToken != null)
+        }
+
+        return result
+    }
+
+    fun updateVideo(videoId: String, newTitle: String) {
+        youtubeService?.let { theYoutubeService ->
+            val request = theYoutubeService.Videos().list("snippet")
+            val response = request.setId(videoId).execute()
+            response.items.firstOrNull()?.let { video ->
+                val title = video.snippet.title
+                println("video: $videoId; $title")
+                video.snippet.title = newTitle
+                val request2 = theYoutubeService.Videos().update("snippet", video)
+                val response2 = request2.execute()
+                println(response2)
+            }
+        }
+    }
 }
+
+data class YoutubeVideo(
+    val id: String,
+    val fileName: String,
+    val title: String
+)

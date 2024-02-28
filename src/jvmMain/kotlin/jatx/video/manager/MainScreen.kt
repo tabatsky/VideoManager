@@ -31,6 +31,7 @@ fun MainScreen(
             onChooseFolder = onChooseFolder
         )
         VideoContentsDialog()
+        YoutubeDialog()
 
         Row(
             modifier = Modifier
@@ -204,8 +205,17 @@ private fun RowScope.VideoListColumn() {
             Injector.viewModel.isAddFolderDialogVisible = true
         }, modifier = Modifier
             .fillMaxWidth()
+            .padding(4.dp)
         ) {
             Text("Добавить папку")
+        }
+        Button(onClick = {
+            Injector.viewModel.openYoutubeDialog()
+        }, modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+        ) {
+            Text("Youtube")
         }
     }
 }

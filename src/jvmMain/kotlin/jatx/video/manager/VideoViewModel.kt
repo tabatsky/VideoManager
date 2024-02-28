@@ -10,7 +10,6 @@ import com.sun.jna.Native
 import kotlinx.coroutines.*
 import uk.co.caprica.vlcjinfo.binding.LibMediaInfo
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 
 class VideoViewModel(
@@ -48,13 +47,15 @@ class VideoViewModel(
 
     var thumbnails = mutableStateMapOf<Long, ImageBitmap>()
 
+    var isYoutubeDialogVisible by mutableStateOf(false)
+    var youtubeVideos: List<Pair<YoutubeVideo, String>> by mutableStateOf(listOf())
+
     init {
         Native.load("mediainfo", LibMediaInfo::class.java)
     }
 
     fun onAppStart() {
         coroutineScope.launch {
-            fetchYoutubeData()
             updateAllVideos()
             withContext(Dispatchers.IO) {
                 makeThumbnails()
@@ -62,27 +63,50 @@ class VideoViewModel(
         }
     }
 
-    private fun fetchYoutubeData() {
-        val youtubeData = YoutubeAPI.tryFetchVideos("VideoCamera")
-        val videoEntryNames = videoRepository.getAllVideos().associate { it.file.name to it.videoName }
-        youtubeData.forEach {
-            val videoTitle = it.second
-            val sdfParse = SimpleDateFormat("yyyy MM dd HH mm ss")
-            try {
-                val date = sdfParse.parse(videoTitle)
-                val sdfFormat = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
-                val formattedDate = sdfFormat.format(date)
-                val fileName = "$formattedDate.m2ts"
-                if (fileName in videoEntryNames.keys) {
-                    val videoName = videoEntryNames[fileName]!!
-                    println("video: $videoTitle; $videoName")
-                } else {
-                    println("video not found in local DB: $videoTitle")
-                }
-            } catch (e: Exception) {
-                println("wrong video title: $videoTitle")
+    fun updateYoutubeTitle(youtubeVideoId: String, videoName: String) {
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                println("updating youtube title: $youtubeVideoId; $videoName")
+                YoutubeAPI.updateVideo(youtubeVideoId, videoName)
             }
         }
+    }
+
+    fun openYoutubeDialog() {
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                youtubeVideos = fetchYoutubeData()
+                isYoutubeDialogVisible = true
+            }
+        }
+    }
+
+    private fun fetchYoutubeData(): List<Pair<YoutubeVideo, String>> {
+        val result = arrayListOf<Pair<YoutubeVideo, String>>()
+        val result2 = arrayListOf<Pair<YoutubeVideo, String>>()
+        val result3 = arrayListOf<Pair<YoutubeVideo, String>>()
+
+        val youtubeData = YoutubeAPI.tryFetchPlaylistVideos("VideoCamera")
+        val videoEntryNames = videoRepository.getAllVideos().associate { it.file.name to it.videoName }
+        youtubeData.forEach {
+            val fileName = it.fileName
+            val youtubeTitle = it.title
+            if (fileName in videoEntryNames.keys) {
+                val videoName = videoEntryNames[fileName]!!
+                println("video: $youtubeTitle; $videoName")
+                if (videoName != fileName && videoName != youtubeTitle) {
+                    result.add(it to videoName)
+                } else if (videoName == youtubeTitle) {
+                    result2.add(it to videoName)
+                } else if (videoName == fileName) {
+                    result3.add(it to videoName)
+                }
+            } else {
+                println("video not found in local DB: $youtubeTitle")
+            }
+        }
+
+        return result + result2 + result3
     }
 
     private fun makeThumbnails() {
