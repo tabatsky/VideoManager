@@ -96,15 +96,21 @@ fun YoutubeDialog() {
                                 modifier = Modifier
                                     .weight(1f)
                             )
+                            val enabled = videoName.length <= 100 &&
+                                    videoName != youtubeTitle &&
+                                    videoName != youtubeFileName
+                            val buttonText = if (videoName.length <= 100) {
+                                "Обновить"
+                            } else {
+                                "${videoName.length} / 100"
+                            }
                             Button(
                                 onClick = {
                                     Injector.viewModel.updateYoutubeTitle(youtubeId, videoName)
                                 },
-                                enabled = videoName.length <= 100 &&
-                                        videoName != youtubeTitle &&
-                                        videoName != youtubeFileName
+                                enabled = enabled
                             ) {
-                                Text(text = "Обновить")
+                                Text(text = buttonText)
                             }
                         }
                     }
