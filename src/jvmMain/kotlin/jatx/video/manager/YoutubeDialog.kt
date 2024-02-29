@@ -1,5 +1,6 @@
 package jatx.video.manager
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
@@ -60,7 +62,25 @@ fun YoutubeDialog() {
                         val youtubeTitle = item.first.title
                         val youtubeFileName = item.first.fileName
                         val videoName = item.second
-                        Row {
+
+                        val bgColor = if (videoName != youtubeFileName && videoName != youtubeTitle) {
+                            Color.Yellow
+                        } else if (videoName == youtubeTitle) {
+                            Color.Green
+                        } else {
+                            Color.Gray
+                        }.let { color ->
+                            val red = color.red
+                            val green = color.green
+                            val blue = color.blue
+                            val alpha = 0.3f
+                            Color(red, green, blue, alpha)
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .background(bgColor)
+                        ) {
                             Text(
                                 text = "${index + 1}.",
                                 modifier = Modifier
