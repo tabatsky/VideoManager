@@ -9,7 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun VideoItem(videoItemEntry: VideoItemEntry) {
@@ -29,15 +31,27 @@ fun VideoItem(videoItemEntry: VideoItemEntry) {
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                val thumbnailPngFile = Injector.viewModel
-                    .thumbnails[videoItemEntry.videoEntry.id]
-                thumbnailPngFile?.let {
-                    Image(
-                        bitmap = it,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .width(64.dp)
-                            .height(36.dp)
+                Column(
+                    modifier = Modifier
+                        .width(64.dp)
+                        .wrapContentHeight(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    val thumbnailPngFile = Injector.viewModel
+                        .thumbnails[videoItemEntry.videoEntry.id]
+                    thumbnailPngFile?.let {
+                        Image(
+                            bitmap = it,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .width(64.dp)
+                                .height(36.dp)
+                        )
+                    }
+                    Text(
+                        text = videoItemEntry.videoEntry.duration.formatDuration(),
+                        fontSize = 10.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
                 Text(
