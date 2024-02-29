@@ -1,7 +1,9 @@
 package jatx.video.manager
 
 import com.google.api.client.auth.oauth2.Credential
+import com.google.api.client.auth.oauth2.StoredCredential
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
+import com.google.api.client.extensions.java6.auth.oauth2.FileCredentialStore
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
@@ -36,6 +38,7 @@ object YoutubeAPI {
         val inputStream: InputStream = File(CLIENT_SECRETS).inputStream()
         val clientSecrets =
             GoogleClientSecrets.load(JSON_FACTORY, InputStreamReader(inputStream))
+        val credentialStore = FileCredentialStore(File("youtube_api.json"), JSON_FACTORY)
         // Build flow and trigger user authorization request.
         val flow =
             GoogleAuthorizationCodeFlow.Builder(
@@ -44,8 +47,12 @@ object YoutubeAPI {
                 clientSecrets,
                 SCOPES
             )
+                .setCredentialStore(credentialStore)
+                .setAccessType("offline")
                 .build()
-        return AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize("user")
+        var credential = AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize("user")
+        StoredCredential(credential)
+        return credential
     }
 
     @Throws(GeneralSecurityException::class, IOException::class)
