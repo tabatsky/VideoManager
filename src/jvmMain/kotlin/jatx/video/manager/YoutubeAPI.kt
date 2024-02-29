@@ -57,8 +57,18 @@ object YoutubeAPI {
             .build()
     }
 
+    fun fetchPlaylistNames(): List<String> {
+        youtubeService?.let { theYoutubeService ->
+            // Define and execute the API request
+            val request = theYoutubeService.playlists()
+                .list("snippet,contentDetails")
+            val response = request.setMine(true).execute()
+            return response.items.map { it.snippet.title }
+        } ?: return listOf()
+    }
+
     @Throws(GeneralSecurityException::class, IOException::class, GoogleJsonResponseException::class)
-    fun tryFetchPlaylistVideos(playlistNameToFetch: String): List<YoutubeVideo> {
+    fun fetchPlaylistVideos(playlistNameToFetch: String): List<YoutubeVideo> {
         val result = arrayListOf<YoutubeVideo>()
 
         youtubeService?.let { theYoutubeService ->
@@ -82,7 +92,7 @@ object YoutubeAPI {
                         val videoIds = response2.items.map { playlistItem ->
                             playlistItem.contentDetails.videoId
                         }
-                        val fetchedVideos = tryFetchVideos(videoIds)
+                        val fetchedVideos = fetchVideos(videoIds)
                         result.addAll(fetchedVideos)
                         nextPageToken = response2.nextPageToken
                         println(nextPageToken)
@@ -95,7 +105,7 @@ object YoutubeAPI {
     }
 
     @Throws(GeneralSecurityException::class, IOException::class, GoogleJsonResponseException::class)
-    private fun tryFetchVideos(videoIds: List<String>): List<YoutubeVideo> {
+    private fun fetchVideos(videoIds: List<String>): List<YoutubeVideo> {
         val result = arrayListOf<YoutubeVideo>()
         val videoIdsStr = videoIds.joinToString(",")
 

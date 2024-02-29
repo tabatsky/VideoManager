@@ -46,6 +46,8 @@ class VideoViewModel(
 
     var isYoutubeDialogVisible by mutableStateOf(false)
     var youtubeVideos: List<Pair<YoutubeVideo, String>> by mutableStateOf(listOf())
+    var youtubePlaylistNames: List<String> by mutableStateOf(listOf())
+    var youtubeSelectedPlaylistName by mutableStateOf("")
 
     init {
         Native.load("mediainfo", LibMediaInfo::class.java)
@@ -72,8 +74,17 @@ class VideoViewModel(
     fun openYoutubeDialog() {
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
-                youtubeVideos = fetchYoutubeData()
+                youtubePlaylistNames = YoutubeAPI.fetchPlaylistNames()
+                youtubeSelectedPlaylistName = youtubePlaylistNames.getOrElse(0) { "" }
                 isYoutubeDialogVisible = true
+            }
+        }
+    }
+
+    fun updateYoutubeVideos() {
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                youtubeVideos = fetchYoutubeData()
             }
         }
     }
@@ -83,7 +94,7 @@ class VideoViewModel(
         val result2 = arrayListOf<Pair<YoutubeVideo, String>>()
         val result3 = arrayListOf<Pair<YoutubeVideo, String>>()
 
-        val youtubeData = YoutubeAPI.tryFetchPlaylistVideos("VideoCamera")
+        val youtubeData = YoutubeAPI.fetchPlaylistVideos(youtubeSelectedPlaylistName)
         val videoEntryNames = videoRepository.getAllVideos().associate { it.file.name to it.videoName }
         youtubeData.forEach {
             val fileName = it.fileName
@@ -99,7 +110,7 @@ class VideoViewModel(
                     result3.add(it to videoName)
                 }
             } else {
-                println("video not found in local DB: $youtubeTitle")
+                println("video not found in local DB: $fileName; $youtubeTitle")
             }
         }
 
