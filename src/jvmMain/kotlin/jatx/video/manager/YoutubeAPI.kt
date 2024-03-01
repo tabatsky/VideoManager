@@ -124,7 +124,7 @@ object YoutubeAPI {
 
                 response.items.forEach { video ->
                     val videoId = video.id
-                    val videoTitle = video.snippet.title
+                    val videoTitle = video.snippet.title.trim()
                     val videoFileName = video.fileDetails.fileName
                     println("video: $videoId; $videoFileName; $videoTitle")
                     val youtubeVideo = YoutubeVideo(

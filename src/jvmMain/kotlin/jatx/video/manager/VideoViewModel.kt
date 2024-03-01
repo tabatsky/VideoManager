@@ -100,7 +100,7 @@ class VideoViewModel(
             val fileName = it.fileName
             val youtubeTitle = it.title
             if (fileName in videoEntryNames.keys) {
-                val videoName = videoEntryNames[fileName]!!
+                val videoName = videoEntryNames[fileName]!!.trim()
                 println("video: $youtubeTitle; $videoName")
                 if (videoName != fileName && videoName != youtubeTitle) {
                     result.add(it to videoName)
