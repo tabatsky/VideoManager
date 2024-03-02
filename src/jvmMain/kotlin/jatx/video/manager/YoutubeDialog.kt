@@ -75,7 +75,11 @@ fun YoutubeDialog() {
                         val videoName = item.second
 
                         val bgColor = if (videoName != youtubeFileName && videoName != youtubeTitle) {
-                            Color.Yellow
+                            if (videoName == "null") {
+                                Color(1f, 0.5f, 0.5f)
+                            } else {
+                                Color.Yellow
+                            }
                         } else if (videoName == youtubeTitle) {
                             Color.Green
                         } else {
@@ -109,7 +113,8 @@ fun YoutubeDialog() {
                             )
                             val enabled = videoName.length <= 100 &&
                                     videoName != youtubeTitle &&
-                                    videoName != youtubeFileName
+                                    videoName != youtubeFileName &&
+                                    videoName != "null"
                             val buttonText = if (videoName.length <= 100) {
                                 "Обновить"
                             } else {

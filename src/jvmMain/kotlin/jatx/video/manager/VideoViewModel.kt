@@ -93,6 +93,7 @@ class VideoViewModel(
         val result = arrayListOf<Pair<YoutubeVideo, String>>()
         val result2 = arrayListOf<Pair<YoutubeVideo, String>>()
         val result3 = arrayListOf<Pair<YoutubeVideo, String>>()
+        val result4 = arrayListOf<Pair<YoutubeVideo, String>>()
 
         val youtubeData = YoutubeAPI.fetchPlaylistVideos(youtubeSelectedPlaylistName)
         val videoEntryNames = videoRepository.getAllVideos().associate { it.file.name to it.videoName }
@@ -106,15 +107,15 @@ class VideoViewModel(
                     result.add(it to videoName)
                 } else if (videoName == youtubeTitle) {
                     result2.add(it to videoName)
-                } else if (videoName == fileName) {
+                } else if (videoName == fileName) { // for clarity, always true
                     result3.add(it to videoName)
                 }
             } else {
-                println("video not found in local DB: $fileName; $youtubeTitle")
+                result4.add(it to "null")
             }
         }
 
-        return result + result2 + result3
+        return result + result2 + result3 + result4
     }
 
     private fun makeThumbnails() {
