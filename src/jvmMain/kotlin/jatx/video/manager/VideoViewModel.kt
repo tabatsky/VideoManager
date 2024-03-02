@@ -75,7 +75,7 @@ class VideoViewModel(
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
                 youtubePlaylistNames = YoutubeAPI.fetchPlaylistNames()
-                youtubeSelectedPlaylistName = youtubePlaylistNames.getOrElse(0) { "" }
+                youtubeSelectedPlaylistName = settings.lastYoutubePlaylist
                 isYoutubeDialogVisible = true
             }
         }
@@ -158,7 +158,6 @@ class VideoViewModel(
 
     fun chooseFolder(dir: File) {
         settings.lastDirPath = dir.absolutePath
-        settings.saveSettings()
         folderPath = dir.absolutePath
         playlistName = dir.name
         folderContents = scanVideoDir(dir)

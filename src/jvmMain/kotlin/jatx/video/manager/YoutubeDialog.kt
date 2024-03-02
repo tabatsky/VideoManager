@@ -30,18 +30,29 @@ fun YoutubeDialog() {
                     modifier = Modifier
                         .wrapContentHeight()
                         .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
+                    val initialPosition = Injector.viewModel.youtubePlaylistNames.indexOf(
+                            Injector.viewModel.youtubeSelectedPlaylistName
+                    ).takeIf { it >= 0 } ?: 0
                     Spinner(
                         modifier = Modifier
-                            .height(64.dp)
+                            .height(48.dp)
                             .weight(1f),
                         fontSize = 16.sp,
                         valueList = Injector.viewModel.youtubePlaylistNames.toTypedArray(),
-                        initialPosition = 0,
+                        initialPosition = initialPosition,
                         onPositionChanged = {
                             Injector.viewModel.youtubeSelectedPlaylistName =
                                 Injector.viewModel.youtubePlaylistNames[it]
+                            Injector.settings.lastYoutubePlaylist =
+                                    Injector.viewModel.youtubeSelectedPlaylistName
                         }
+                    )
+                    Box(
+                            modifier = Modifier
+                                    .width(24.dp)
+                                    .height(48.dp)
                     )
                     Button(
                         onClick = {
@@ -49,7 +60,7 @@ fun YoutubeDialog() {
                         },
                         modifier = Modifier
                             .width(300.dp)
-                            .height(64.dp)
+                            .height(48.dp)
                     ) {
                         Text(text = "Получить плейлист")
                     }
