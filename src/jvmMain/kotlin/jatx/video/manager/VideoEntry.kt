@@ -44,7 +44,7 @@ fun File.toVideoEntry(playlistName: String): VideoEntry {
         playlistName = playlistName,
         lastModified = lastModifiedDate,
         duration = this.duration,
-        recorded = this.recordedDate,
+        recorded = this.dateFromFileName ?: this.recordedDate,
         crc32 = this.calculateCRC32()
     )
 }
@@ -98,6 +98,20 @@ val File.recordedDate: Date
         val time = sdf.parse(formattedDateStr).time
         return Date(time + zoneDelta)
     }
+
+val File.dateFromFileName: Date?
+    get() = this
+        .nameWithoutExtension
+        .filter { it in '0'..'9' }
+        .let {
+            println(it)
+            it
+        }
+        .takeIf { it.length == 14 }
+        ?.let {
+            val sdf = SimpleDateFormat("yyyyMMddHHmmss")
+            sdf.parse(it)
+        }
 
 fun String.parseDuration(): Long {
     val durationStr = this.split(" ")[0]
