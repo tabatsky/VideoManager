@@ -32,7 +32,7 @@ fun List<VideoEntry>.toItemEntries() = this
                 val innerItemEntries = arrayListOf<ItemEntry>()
                 innerItemEntries.add(YearItemEntry(playlistName, it.first))
                 val videoItemEntries = it.second
-                    .sortedBy { it.lastModified }
+                    .sortedBy { it.actualDate }
                     .reversed()
                     .map { VideoItemEntry(it) }
                 innerItemEntries.addAll(videoItemEntries)
