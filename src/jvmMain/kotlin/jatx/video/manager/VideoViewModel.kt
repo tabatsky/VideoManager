@@ -233,6 +233,17 @@ class VideoViewModel(
         }
     }
 
+    fun setCurrentVideoDeleted(deleted: Boolean) {
+        currentVideo?.let {
+            val newVideoEntry = it.copy(
+                deleted = deleted
+            )
+            videoRepository.updateVideoDeleted(newVideoEntry)
+            updateAllVideos()
+            currentVideo = newVideoEntry
+        }
+    }
+
     fun onVideoPlayerTimeChanged(newTime: Long) {
         currentVideoProgressMs = newTime
         currentVideoProgressPercent = 1f * newTime / currentVideoDuration

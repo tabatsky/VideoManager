@@ -19,6 +19,7 @@ data class VideoEntry(
     val duration: Long,
     var recorded: Date,
     val crc32: Long,
+    var deleted: Boolean = false,
     val comment: String = ""
 ) {
     val url = file.toURI()
@@ -59,6 +60,7 @@ fun VideoEntity.toVideoEntry() = let {
         duration = duration,
         recorded = Date(it.recorded),
         crc32 = it.crc32,
+        deleted = it.deleted > 0,
         comment = it.comment
     )
 }
@@ -73,6 +75,7 @@ fun VideoEntry.toVideoEntity() = let {
         duration = it.duration,
         recorded = it.recorded.time,
         crc32 = it.crc32,
+        deleted = if (it.deleted) 1 else 0,
         comment = it.comment
     )
 }

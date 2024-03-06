@@ -2,6 +2,7 @@ package jatx.video.manager
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -27,6 +28,8 @@ fun VideoContentsDialog() {
             onCloseRequest = onDismiss,
             state = dialogState
         ) {
+            val showConfirmationState = remember { mutableStateOf(false) }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -84,28 +87,76 @@ fun VideoContentsDialog() {
                     modifier = Modifier
                         .padding(12.dp)
                 )
-                Button(
-                    onClick = {
-                        try {
-                            val newRecordedDate = recordedTextFieldValue.tryParseDate()
-                            Injector.viewModel.updateCurrentVideoEntry(
-                                newRecordedDate = newRecordedDate,
-                                newVideoName = videoName,
-                                newComment = comment
-                            )
-                            onDismiss()
-                        } catch (e: Exception) {
-                            isParseError = true
-                        }
+                Row {
+                    Button(
+                        onClick = {
+                            try {
+                                val newRecordedDate = recordedTextFieldValue.tryParseDate()
+                                Injector.viewModel.updateCurrentVideoEntry(
+                                    newRecordedDate = newRecordedDate,
+                                    newVideoName = videoName,
+                                    newComment = comment
+                                )
+                                onDismiss()
+                            } catch (e: Exception) {
+                                isParseError = true
+                            }
+                        }, modifier = Modifier
+                            .weight(1f)
+                            .padding(10.dp)
+                    ) {
+                        Text("Сохранить",
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                        )
+                    }
+
+                    Button(onClick = {
+                        showConfirmationState.value = true
                     }, modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text("Сохранить",
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                    )
+                        .weight(1f)
+                        .padding(10.dp)
+                    ) {
+                        Text("Удалить")
+                    }
                 }
             }
+
+            DeleteVideoDialogWrapper(showConfirmationState)
         }
+    }
+}
+
+@Composable
+private fun DeleteVideoDialogWrapper(showConfirmationState: MutableState<Boolean>) {
+    var showConfirmation by showConfirmationState
+
+    if (showConfirmation) {
+        AlertDialog(
+            onDismissRequest = {
+                showConfirmation = false
+            },
+            title = {
+                Text(text = "Вы уверены?")
+            },
+            text = {
+                Text(text = "Видео будет удалено в корзину")
+            },
+            confirmButton = {
+                Button(onClick = {
+                    Injector.viewModel.setCurrentVideoDeleted(true)
+                    showConfirmation = false
+                }) {
+                    Text(text = "Да")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    showConfirmation = false
+                }) {
+                    Text(text = "Нет")
+                }
+            }
+        )
     }
 }

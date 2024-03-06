@@ -166,7 +166,7 @@ private fun ColumnScope.ControlsAndInfoRow() {
             Injector.viewModel.showVideoContentsDialog()
         }, modifier = Modifier
             .width(160.dp)
-            .padding(20.dp)
+            .padding(10.dp)
         ) {
             Text("Подробнее")
         }

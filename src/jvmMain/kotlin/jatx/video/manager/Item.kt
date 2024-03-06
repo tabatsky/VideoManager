@@ -15,7 +15,13 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun VideoItem(videoItemEntry: VideoItemEntry) {
-    if (Injector.viewModel.expandedPlaylistName == videoItemEntry.videoEntry.playlistName &&
+    val playlistMatches =
+        (Injector.viewModel.expandedPlaylistName == videoItemEntry.videoEntry.playlistName &&
+                !videoItemEntry.videoEntry.deleted) ||
+                (Injector.viewModel.expandedPlaylistName == "Корзина" &&
+                        videoItemEntry.videoEntry.deleted)
+
+    if (playlistMatches &&
         Injector.viewModel.expandedYear == videoItemEntry.videoEntry.year) {
         Box(
             modifier = Modifier

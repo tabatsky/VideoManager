@@ -64,4 +64,13 @@ class VideoRepository(
                 id = videoEntity.id
             )
     }
+
+    fun updateVideoDeleted(videoEntry: VideoEntry) = videoEntry.toVideoEntity().let { videoEntity ->
+        appDatabase
+            .videoEntityQueries
+            .updateVideoDeleted(
+                deleted = videoEntity.deleted,
+                id = videoEntity.id
+            )
+    }
 }
