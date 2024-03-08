@@ -45,7 +45,7 @@ class VideoViewModel(
     var thumbnails = mutableStateMapOf<Long, ImageBitmap>()
 
     var isYoutubeDialogVisible by mutableStateOf(false)
-    var youtubeVideos: List<Pair<YoutubeVideo, String>> by mutableStateOf(listOf())
+    var youtubeVideos: List<Pair<YoutubeVideo?, String>> by mutableStateOf(listOf())
     var youtubePlaylistNames: List<String> by mutableStateOf(listOf())
     var youtubeSelectedPlaylistName by mutableStateOf("")
 
@@ -89,8 +89,8 @@ class VideoViewModel(
         }
     }
 
-    private fun fetchYoutubeData(): List<Pair<YoutubeVideo, String>> {
-        val result = arrayListOf<Pair<YoutubeVideo, String>>()
+    private fun fetchYoutubeData(): List<Pair<YoutubeVideo?, String>> {
+        val result1 = arrayListOf<Pair<YoutubeVideo, String>>()
         val result2 = arrayListOf<Pair<YoutubeVideo, String>>()
         val result3 = arrayListOf<Pair<YoutubeVideo, String>>()
         val result4 = arrayListOf<Pair<YoutubeVideo, String>>()
@@ -104,7 +104,7 @@ class VideoViewModel(
                 val videoName = videoEntryNames[fileName]!!.trim()
                 println("video: $youtubeTitle; $videoName")
                 if (videoName != fileName && videoName != youtubeTitle) {
-                    result.add(it to videoName)
+                    result1.add(it to videoName)
                 } else if (videoName == youtubeTitle) {
                     result2.add(it to videoName)
                 } else if (videoName == fileName) { // for clarity, always true
@@ -115,7 +115,17 @@ class VideoViewModel(
             }
         }
 
-        return result + result2 + result3 + result4
+        val result = result1 + result2 + result3 + result4
+        val result5 = arrayListOf<Pair<YoutubeVideo?, String>>()
+        videoRepository.getAllVideos()
+            .filter { it.playlistName == youtubeSelectedPlaylistName }
+            .forEach { videoEntry ->
+                if (result.count { it.first.fileName == videoEntry.file.name } == 0) {
+                    result5.add(null to videoEntry.videoName)
+                }
+            }
+
+        return result + result5
     }
 
     private fun makeThumbnails() {
@@ -133,10 +143,8 @@ class VideoViewModel(
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
                 val allVideosFromDB = videoRepository.getAllVideos()
-                val allVideosIterator = allVideosFromDB.sortedBy { it.file.absolutePath }.iterator()
                 var index = 0
-                while (allVideosIterator.hasNext()) {
-                    val videoEntry = allVideosIterator.next()
+                allVideosFromDB.sortedBy { it.file.absolutePath }.forEach { videoEntry ->
                     val newVideoEntry = withContext(Dispatchers.IO) {
                         videoEntry.file
                             .toVideoEntry(videoEntry.playlistName)

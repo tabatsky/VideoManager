@@ -69,13 +69,13 @@ fun YoutubeDialog() {
                     items(Injector.viewModel.youtubeVideos.mapIndexed { index, pair -> index to pair  }) {
                         val index = it.first
                         val item = it.second
-                        val youtubeId = item.first.id
-                        val youtubeTitle = item.first.title
-                        val youtubeFileName = item.first.fileName
+                        val youtubeId = item.first?.id
+                        val youtubeTitle = item.first?.title ?: "null"
+                        val youtubeFileName = item.first?.fileName
                         val videoName = item.second
 
                         val bgColor = if (videoName != youtubeFileName && videoName != youtubeTitle) {
-                            if (videoName == "null") {
+                            if (videoName == "null" || youtubeTitle == "null") {
                                 Color(1f, 0.5f, 0.5f)
                             } else {
                                 Color.Yellow
@@ -122,7 +122,9 @@ fun YoutubeDialog() {
                             }
                             Button(
                                 onClick = {
-                                    Injector.viewModel.updateYoutubeTitle(youtubeId, videoName)
+                                    youtubeId?.let { id ->
+                                        Injector.viewModel.updateYoutubeTitle(id, videoName)
+                                    }
                                 },
                                 enabled = enabled
                             ) {
