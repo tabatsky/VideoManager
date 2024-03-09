@@ -114,7 +114,8 @@ fun YoutubeDialog() {
                             val enabled = videoName.length <= 100 &&
                                     videoName != youtubeTitle &&
                                     videoName != youtubeFileName &&
-                                    videoName != "null"
+                                    videoName != "null" &&
+                                    youtubeTitle != "null"
                             val buttonText = if (videoName.length <= 100) {
                                 "Обновить"
                             } else {
