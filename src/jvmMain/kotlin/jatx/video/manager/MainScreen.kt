@@ -185,7 +185,9 @@ private fun RowScope.VideoListColumn() {
             modifier = Modifier
                 .weight(1f)
         ) {
-            items(Injector.viewModel.allVideos.toItemEntries()) { itemEntry ->
+            items(Injector.viewModel.allVideos.toItemEntries(
+                Injector.viewModel.filterText
+            )) { itemEntry ->
                 when (itemEntry) {
                     is VideoItemEntry -> {
                         VideoItem(itemEntry)
@@ -201,21 +203,31 @@ private fun RowScope.VideoListColumn() {
                 }
             }
         }
-        Button(onClick = {
-            Injector.viewModel.isAddFolderDialogVisible = true
-        }, modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
-        ) {
-            Text("Добавить папку")
-        }
-        Button(onClick = {
-            Injector.viewModel.openYoutubeDialog()
-        }, modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
-        ) {
-            Text("Youtube")
+        TextField(
+            value = Injector.viewModel.filterText,
+            onValueChange = {
+                Injector.viewModel.filterText = it
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+        Row {
+            Button(onClick = {
+                Injector.viewModel.isAddFolderDialogVisible = true
+            }, modifier = Modifier
+                .weight(1f)
+                .padding(4.dp)
+            ) {
+                Text("Добавить папку")
+            }
+            Button(onClick = {
+                Injector.viewModel.openYoutubeDialog()
+            }, modifier = Modifier
+                .weight(1f)
+                .padding(4.dp)
+            ) {
+                Text("Youtube")
+            }
         }
     }
 }

@@ -15,12 +15,15 @@ data class VideoItemEntry(
     val videoEntry: VideoEntry
 ): ItemEntry()
 
-fun List<VideoEntry>.toItemEntries(): List<ItemEntry> {
+fun List<VideoEntry>.toItemEntries(filterText: String): List<ItemEntry> {
     val notDeletedEntries = this
+        .asSequence()
+        .filter { it.videoName.contains(filterText.trim(), ignoreCase = true) }
         .filter { !it.deleted }
         .groupBy { it.playlistName }
         .toList()
         .sortedBy { it.first }
+        .toList()
         .flatMap {
             val playlistName = it.first
             val itemEntries = arrayListOf<ItemEntry>()
@@ -45,6 +48,8 @@ fun List<VideoEntry>.toItemEntries(): List<ItemEntry> {
         }
 
     val deletedEntries = this
+        .asSequence()
+        .filter { it.videoName.contains(filterText.trim(), ignoreCase = true) }
         .filter { it.deleted }
         .groupBy { "Корзина" }
         .toList()

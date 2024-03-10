@@ -49,6 +49,8 @@ class VideoViewModel(
     var youtubePlaylistNames: List<String> by mutableStateOf(listOf())
     var youtubeSelectedPlaylistName by mutableStateOf("")
 
+    var filterText by mutableStateOf("")
+
     init {
         Native.load("mediainfo", LibMediaInfo::class.java)
     }
