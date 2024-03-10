@@ -22,7 +22,7 @@ fun VideoContentsDialog() {
         var videoName by remember { mutableStateOf(Injector.viewModel.currentVideo?.videoName ?: "") }
         var comment by remember { mutableStateOf(Injector.viewModel.currentVideo?.comment ?: "") }
 
-        val dialogState = rememberDialogState(width = 400.dp, height = 450.dp)
+        val dialogState = rememberDialogState(width = 400.dp, height = 550.dp)
 
         DialogWindow(
             onCloseRequest = onDismiss,
