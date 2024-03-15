@@ -1,6 +1,7 @@
 package jatx.video.manager
 
 import com.google.api.client.auth.oauth2.Credential
+import com.google.api.client.auth.oauth2.StoredCredential
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp
 import com.google.api.client.extensions.java6.auth.oauth2.FileCredentialStore
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver
@@ -49,7 +50,9 @@ object YoutubeAPI {
                 .setCredentialStore(credentialStore)
                 .setAccessType("offline")
                 .build()
-        return AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize("user")
+        val credential = AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize("user")
+        StoredCredential(credential)
+        return credential
     }
 
     @Throws(GeneralSecurityException::class, IOException::class)
