@@ -127,7 +127,7 @@ class VideoViewModel(
                 }
             }
 
-        return result + result5
+        return result5 + result
     }
 
     private fun makeThumbnails() {
