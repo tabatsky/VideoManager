@@ -45,3 +45,8 @@ updateVideoDeleted:
 UPDATE videoEntity SET
 deleted=?
 WHERE id=?;
+
+renamePlaylist:
+UPDATE videoEntity SET
+playlistName=?
+WHERE playlistName=?;

@@ -51,6 +51,10 @@ class VideoViewModel(
 
     var filterText by mutableStateOf("")
 
+    var isRenamePlaylistDialogVisible by mutableStateOf(false)
+    var newPlaylistName by mutableStateOf("")
+    var oldPlaylistName by mutableStateOf("")
+
     init {
         Native.load("mediainfo", LibMediaInfo::class.java)
     }
@@ -291,5 +295,16 @@ class VideoViewModel(
     fun seekDone() {
         seekProgressMs = 0L
         needToSeek = false
+    }
+
+    fun showRenamePlaylistDialog(playlistName: String) {
+        oldPlaylistName = playlistName
+        newPlaylistName = playlistName
+        isRenamePlaylistDialogVisible = true
+    }
+
+    fun applyNewPlaylistName() {
+        videoRepository.renamePlaylist(oldPlaylistName, newPlaylistName)
+        updateAllVideos()
     }
 }

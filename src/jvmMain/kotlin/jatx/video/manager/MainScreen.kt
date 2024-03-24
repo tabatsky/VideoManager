@@ -32,6 +32,7 @@ fun MainScreen(
         )
         VideoContentsDialog()
         YoutubeDialog()
+        RenamePlaylistDialog()
 
         Row(
             modifier = Modifier

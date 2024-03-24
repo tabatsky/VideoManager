@@ -73,4 +73,8 @@ class VideoRepository(
                 id = videoEntity.id
             )
     }
+
+    fun renamePlaylist(oldName: String, newName: String) = appDatabase
+        .videoEntityQueries
+        .renamePlaylist(newName, oldName)
 }
