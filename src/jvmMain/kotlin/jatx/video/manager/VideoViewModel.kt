@@ -137,8 +137,10 @@ class VideoViewModel(
     private fun makeThumbnails() {
         allVideos.sortedBy { it.id }.forEach {
             ThumbnailMaker.makeThumbnail(it) { videoEntry, pngFile ->
-                val bitmap = loadImageBitmap(pngFile.inputStream())
-                thumbnails[videoEntry.id] = bitmap
+                if (!thumbnails.containsKey(videoEntry.id)) {
+                    val bitmap = loadImageBitmap(pngFile.inputStream())
+                    thumbnails[videoEntry.id] = bitmap
+                }
                 //println("thumbnail loaded: ${pngFile.name}")
             }
         }
@@ -183,7 +185,7 @@ class VideoViewModel(
         coroutineScope.launch {
             withContext(Dispatchers.Main) {
                 val allPaths = videoRepository.getAllVideos().map { it.file.absolutePath }.toSet()
-                val allCrc32 = videoRepository.getAllVideos().associate { it.crc32 to it }
+                val allCrc32 = videoRepository.getAllVideos().associateBy { it.crc32 }
                 val nonDuplicateFolderContents = folderContents.filter { it.absolutePath !in allPaths }
                 nonDuplicateFolderContents.forEachIndexed { index, file ->
                     val videoEntry = withContext(Dispatchers.IO) {
@@ -208,6 +210,9 @@ class VideoViewModel(
                     }
                 }
                 println("inserted: all")
+                withContext(Dispatchers.IO) {
+                    makeThumbnails()
+                }
             }
         }
     }
