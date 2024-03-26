@@ -111,13 +111,19 @@ fun VideoContentsDialog() {
                         )
                     }
 
+                    val deleteOrRestoreLabel = if (Injector.viewModel.currentVideo?.deleted == true) {
+                        "Восстановить"
+                    } else {
+                        "Удалить"
+                    }
+
                     Button(onClick = {
                         showConfirmationState.value = true
                     }, modifier = Modifier
                         .weight(1f)
                         .padding(10.dp)
                     ) {
-                        Text("Удалить")
+                        Text(deleteOrRestoreLabel)
                     }
                 }
             }
@@ -132,6 +138,12 @@ private fun DeleteVideoDialogWrapper(showConfirmationState: MutableState<Boolean
     var showConfirmation by showConfirmationState
 
     if (showConfirmation) {
+        val willBedeletedOrRestoredLabel = if (Injector.viewModel.currentVideo?.deleted == true) {
+            "Видео будет восстановлено"
+        } else {
+            "Видео будет удалено в корзину"
+        }
+
         AlertDialog(
             onDismissRequest = {
                 showConfirmation = false
@@ -140,11 +152,11 @@ private fun DeleteVideoDialogWrapper(showConfirmationState: MutableState<Boolean
                 Text(text = "Вы уверены?")
             },
             text = {
-                Text(text = "Видео будет удалено в корзину")
+                Text(text = willBedeletedOrRestoredLabel)
             },
             confirmButton = {
                 Button(onClick = {
-                    Injector.viewModel.setCurrentVideoDeleted(true)
+                    Injector.viewModel.toggleCurrentVideoDeleted()
                     showConfirmation = false
                 }) {
                     Text(text = "Да")

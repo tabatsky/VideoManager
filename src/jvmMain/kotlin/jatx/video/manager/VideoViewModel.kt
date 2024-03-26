@@ -252,10 +252,10 @@ class VideoViewModel(
         }
     }
 
-    fun setCurrentVideoDeleted(deleted: Boolean) {
+    fun toggleCurrentVideoDeleted() {
         currentVideo?.let {
             val newVideoEntry = it.copy(
-                deleted = deleted
+                deleted = !it.deleted
             )
             videoRepository.updateVideoDeleted(newVideoEntry)
             updateAllVideos()
