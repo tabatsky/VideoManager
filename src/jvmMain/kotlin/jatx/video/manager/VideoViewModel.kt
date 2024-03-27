@@ -59,6 +59,9 @@ class VideoViewModel(
 
     var folderChooserMode by mutableStateOf(FolderChooserMode.addFolder)
 
+    var exportButtonEnabled by mutableStateOf(true)
+    var exportProgress by mutableStateOf(0f)
+
     init {
         Native.load("mediainfo", LibMediaInfo::class.java)
     }
@@ -328,5 +331,32 @@ class VideoViewModel(
     fun applyNewPlaylistName() {
         videoRepository.renamePlaylist(rightClickPlaylistName, newPlaylistName)
         updateAllVideos()
+    }
+
+    fun exportPlaylistToFolder() {
+        val playlistVideos = allVideos.filter {
+            it.playlistName == rightClickPlaylistName && !it.deleted
+        }
+        val count = playlistVideos.size
+        val outDir = File(folderPath)
+
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                exportButtonEnabled = false
+                exportProgress = 0f
+
+                var done = 0
+
+                playlistVideos.forEach {
+                    val fileName = it.file.name
+                    val outFile = File(outDir, fileName)
+                    it.file.copyTo(outFile, overwrite = true)
+                    done += 1
+                    exportProgress = 1f * done / count
+                }
+
+                exportButtonEnabled = true
+            }
+        }
     }
 }

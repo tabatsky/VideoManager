@@ -108,13 +108,15 @@ fun ExportPlaylistDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(30.dp),
-                    progress = 0.7f
+                    progress = Injector.viewModel.exportProgress
                 )
                 Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    enabled = Injector.viewModel.exportButtonEnabled,
                     onClick = {
-                        onChooseFolder()
-                    }, modifier = Modifier
-                        .fillMaxWidth()
+                        Injector.viewModel.exportPlaylistToFolder()
+                    }
                 ) {
                     Text("Ёкспортировать")
                 }
