@@ -10,6 +10,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogWindow
 
 @Composable
+fun PlaylistRightClickDialog() {
+    val onDismiss = { Injector.viewModel.isPlaylistRightClickDialogVisible = false }
+
+    if (Injector.viewModel.isPlaylistRightClickDialogVisible) {
+        DialogWindow(onCloseRequest = { onDismiss() }) {
+            Column {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = {
+                    onDismiss()
+                    Injector.viewModel.showRenamePlaylistDialog()
+                }) {
+                    Text("Переименовать")
+                }
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = {
+                    onDismiss()
+                }) {
+                    Text("Экспортировать")
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun RenamePlaylistDialog() {
     val onDismiss = { Injector.viewModel.isRenamePlaylistDialogVisible = false }
 
@@ -25,7 +54,11 @@ fun RenamePlaylistDialog() {
                     modifier = Modifier
                         .fillMaxWidth()
                 )
-                Button(onClick = {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = {
+                    onDismiss()
                     Injector.viewModel.applyNewPlaylistName()
                 }) {
                     Text("Применить")

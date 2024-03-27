@@ -51,6 +51,7 @@ class VideoViewModel(
 
     var filterText by mutableStateOf("")
 
+    var isPlaylistRightClickDialogVisible by mutableStateOf(false)
     var isRenamePlaylistDialogVisible by mutableStateOf(false)
     var newPlaylistName by mutableStateOf("")
     var oldPlaylistName by mutableStateOf("")
@@ -302,9 +303,13 @@ class VideoViewModel(
         needToSeek = false
     }
 
-    fun showRenamePlaylistDialog(playlistName: String) {
+    fun showPlaylistRightClickDialog(playlistName: String) {
         oldPlaylistName = playlistName
-        newPlaylistName = playlistName
+        isPlaylistRightClickDialogVisible = true
+    }
+
+    fun showRenamePlaylistDialog() {
+        newPlaylistName = oldPlaylistName
         isRenamePlaylistDialogVisible = true
     }
 

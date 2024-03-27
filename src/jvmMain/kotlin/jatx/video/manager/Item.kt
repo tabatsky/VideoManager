@@ -115,7 +115,7 @@ fun PlaylistItem(playlistItemEntry: PlaylistItemEntry) {
             .onClick(
                 matcher = PointerMatcher.mouse(PointerButton.Secondary),
                 onClick = {
-                    Injector.viewModel.showRenamePlaylistDialog(playlistItemEntry.playlistName)
+                    Injector.viewModel.showPlaylistRightClickDialog(playlistItemEntry.playlistName)
                 }
             )
     ) {

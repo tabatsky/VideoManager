@@ -32,6 +32,7 @@ fun MainScreen(
         )
         VideoContentsDialog()
         YoutubeDialog()
+        PlaylistRightClickDialog()
         RenamePlaylistDialog()
 
         Row(
