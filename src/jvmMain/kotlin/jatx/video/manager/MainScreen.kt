@@ -28,12 +28,21 @@ fun MainScreen(
         val W = maxWidth
 
         AddFolderDialog(
-            onChooseFolder = onChooseFolder
+            onChooseFolder = {
+                Injector.viewModel.folderChooserMode = FolderChooserMode.addFolder
+                onChooseFolder()
+            }
         )
         VideoContentsDialog()
         YoutubeDialog()
         PlaylistRightClickDialog()
         RenamePlaylistDialog()
+        ExportPlaylistDialog(
+            onChooseFolder = {
+                Injector.viewModel.folderChooserMode = FolderChooserMode.exportPlaylist
+                onChooseFolder()
+            }
+        )
 
         Row(
             modifier = Modifier

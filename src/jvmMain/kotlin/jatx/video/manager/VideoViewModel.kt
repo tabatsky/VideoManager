@@ -53,8 +53,11 @@ class VideoViewModel(
 
     var isPlaylistRightClickDialogVisible by mutableStateOf(false)
     var isRenamePlaylistDialogVisible by mutableStateOf(false)
+    var isExportPlaylistDialogVisible by mutableStateOf(false)
     var newPlaylistName by mutableStateOf("")
-    var oldPlaylistName by mutableStateOf("")
+    var rightClickPlaylistName by mutableStateOf("")
+
+    var folderChooserMode by mutableStateOf(FolderChooserMode.addFolder)
 
     init {
         Native.load("mediainfo", LibMediaInfo::class.java)
@@ -177,9 +180,14 @@ class VideoViewModel(
     fun chooseFolder(dir: File) {
         settings.lastDirPath = dir.absolutePath
         folderPath = dir.absolutePath
-        playlistName = dir.name
-        folderContents = scanVideoDir(dir)
-        folderVideoCount = folderContents.size
+        when (folderChooserMode) {
+            FolderChooserMode.addFolder -> {
+                playlistName = dir.name
+                folderContents = scanVideoDir(dir)
+                folderVideoCount = folderContents.size
+            }
+            FolderChooserMode.exportPlaylist -> Unit
+        }
     }
 
     fun addCurrentFolderContents() {
@@ -304,17 +312,21 @@ class VideoViewModel(
     }
 
     fun showPlaylistRightClickDialog(playlistName: String) {
-        oldPlaylistName = playlistName
+        rightClickPlaylistName = playlistName
         isPlaylistRightClickDialogVisible = true
     }
 
     fun showRenamePlaylistDialog() {
-        newPlaylistName = oldPlaylistName
+        newPlaylistName = rightClickPlaylistName
         isRenamePlaylistDialogVisible = true
     }
 
+    fun showExportPlaylistDialog() {
+        isExportPlaylistDialogVisible = true
+    }
+
     fun applyNewPlaylistName() {
-        videoRepository.renamePlaylist(oldPlaylistName, newPlaylistName)
+        videoRepository.renamePlaylist(rightClickPlaylistName, newPlaylistName)
         updateAllVideos()
     }
 }

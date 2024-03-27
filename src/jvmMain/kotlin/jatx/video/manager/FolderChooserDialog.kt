@@ -58,3 +58,7 @@ private fun WindowScope.FolderChooserDialog(
         }
     }
 }
+
+enum class FolderChooserMode {
+    addFolder, exportPlaylist
+}

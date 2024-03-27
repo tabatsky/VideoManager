@@ -1,12 +1,17 @@
 package jatx.video.manager
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.Button
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 
 @Composable
@@ -20,17 +25,18 @@ fun PlaylistRightClickDialog() {
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = {
-                    onDismiss()
-                    Injector.viewModel.showRenamePlaylistDialog()
-                }) {
+                        onDismiss()
+                        Injector.viewModel.showRenamePlaylistDialog()
+                    }) {
                     Text("ѕереименовать")
                 }
                 Button(
                     modifier = Modifier
                         .fillMaxWidth(),
                     onClick = {
-                    onDismiss()
-                }) {
+                        onDismiss()
+                        Injector.viewModel.showExportPlaylistDialog()
+                    }) {
                     Text("Ёкспортировать")
                 }
             }
@@ -62,6 +68,55 @@ fun RenamePlaylistDialog() {
                     Injector.viewModel.applyNewPlaylistName()
                 }) {
                     Text("ѕрименить")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExportPlaylistDialog(
+    onChooseFolder: () -> Unit
+) {
+    val onDismiss = { Injector.viewModel.isExportPlaylistDialogVisible = false }
+
+    if (Injector.viewModel.isExportPlaylistDialogVisible) {
+        DialogWindow(onCloseRequest = { onDismiss() }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Row {
+                    Text(
+                        text = Injector.viewModel.folderPath,
+                        modifier = Modifier
+                            .weight(4f)
+                    )
+                    Button(
+                        onClick = {
+                            onChooseFolder()
+                        }, modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text("...",
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                        )
+                    }
+                }
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp),
+                    progress = 0.7f
+                )
+                Button(
+                    onClick = {
+                        onChooseFolder()
+                    }, modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text("Ёкспортировать")
                 }
             }
         }
