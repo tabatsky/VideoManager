@@ -28,10 +28,6 @@ object YoutubeAPI {
     private val SCOPES: Collection<String> = mutableListOf("https://www.googleapis.com/auth/youtube")
     private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
 
-    private val youtubeService by lazy {
-        getService()
-    }
-
     @Throws(IOException::class)
     fun authorize(httpTransport: NetHttpTransport?): Credential? {
         // Load client secrets.
@@ -65,7 +61,17 @@ object YoutubeAPI {
     }
 
     fun fetchPlaylistNames(): List<String> {
-        youtubeService?.let { theYoutubeService ->
+        try {
+            return tryFetchPlaylistNames()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            File("youtube_api.json").delete()
+            return tryFetchPlaylistNames()
+        }
+    }
+
+    private fun tryFetchPlaylistNames(): List<String> {
+        getService()?.let { theYoutubeService ->
             // Define and execute the API request
             val request = theYoutubeService.playlists()
                 .list("snippet,contentDetails")
@@ -78,7 +84,7 @@ object YoutubeAPI {
     fun fetchPlaylistVideos(playlistNameToFetch: String): List<YoutubeVideo> {
         val result = arrayListOf<YoutubeVideo>()
 
-        youtubeService?.let { theYoutubeService ->
+        getService()?.let { theYoutubeService ->
             // Define and execute the API request
             val request = theYoutubeService.playlists()
                 .list("snippet,contentDetails")
@@ -116,7 +122,7 @@ object YoutubeAPI {
         val result = arrayListOf<YoutubeVideo>()
         val videoIdsStr = videoIds.joinToString(",")
 
-        youtubeService?.let { theYoutubeService ->
+        getService()?.let { theYoutubeService ->
             var nextPageToken: String? = null
             do {
                 val request = theYoutubeService.Videos().list("snippet,fileDetails")
@@ -143,7 +149,7 @@ object YoutubeAPI {
     }
 
     fun updateVideo(videoId: String, newTitle: String) {
-        youtubeService?.let { theYoutubeService ->
+        getService()?.let { theYoutubeService ->
             val request = theYoutubeService.Videos().list("snippet")
             val response = request.setId(videoId).execute()
             response.items.firstOrNull()?.let { video ->
