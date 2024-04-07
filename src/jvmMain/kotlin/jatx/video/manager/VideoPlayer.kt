@@ -31,7 +31,7 @@ fun VideoPlayerImpl(
 
     val factory = remember { { mediaPlayerComponent } }
 
-    LaunchedEffect(url) { mediaPlayer.media().play(url) }
+    LaunchedEffect(url) { mediaPlayer.media().play(url, "--avcodec-hw=d3d11va") }
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
             mediaPlayer.controls().play()
