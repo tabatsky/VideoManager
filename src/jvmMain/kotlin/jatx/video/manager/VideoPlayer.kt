@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.SwingPanel
 import androidx.compose.ui.graphics.Color
 import uk.co.caprica.vlcj.factory.discovery.NativeDiscovery
-import uk.co.caprica.vlcj.factory.discovery.strategy.NativeDiscoveryStrategy
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
 import uk.co.caprica.vlcj.player.component.CallbackMediaPlayerComponent
@@ -32,7 +31,7 @@ fun VideoPlayerImpl(
 
     val factory = remember { { mediaPlayerComponent } }
 
-    LaunchedEffect(url) { mediaPlayer.media().play(url, "--avcodec-hw=d3d11va" /*, "--vout=auto" */) }
+    LaunchedEffect(url) { mediaPlayer.media().play(url, "--avcodec-hw=d3d11va", "--vout=glwin32") }
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
             mediaPlayer.controls().play()
@@ -69,28 +68,8 @@ fun VideoPlayerImpl(
 }
 
 private fun initializeMediaPlayerComponent(): Component {
-    val discoveryStrategy = object: NativeDiscoveryStrategy {
-        override fun supported(): Boolean = true
-
-        override fun discover(): String = "J:\\VLC\\libvlc.dll"
-
-        override fun onFound(p0: String?): Boolean {
-            println("on found: $p0")
-            return true
-        }
-
-        override fun onSetPluginPath(p0: String?): Boolean {
-            println("on set plugin path: $p0")
-            return true
-        }
-
-    }
-    NativeDiscovery(discoveryStrategy).discover()
-    return if (isMacOS()) {
-        CallbackMediaPlayerComponent()
-    } else {
-        EmbeddedMediaPlayerComponent()
-    }
+    NativeDiscovery().discover()
+    return CallbackMediaPlayerComponent()
 }
 
 private fun Component.mediaPlayer() = when (this) {
