@@ -69,7 +69,12 @@ fun VideoPlayerImpl(
 
 private fun initializeMediaPlayerComponent(): Component {
     NativeDiscovery().discover()
-    return CallbackMediaPlayerComponent()
+    return if (isMacOS()) {
+        CallbackMediaPlayerComponent()
+    } else {
+        EmbeddedMediaPlayerComponent()
+    }
+    //return CallbackMediaPlayerComponent()
 }
 
 private fun Component.mediaPlayer() = when (this) {
