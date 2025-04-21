@@ -11,7 +11,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.JsonFactory
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.youtube.YouTube
 import java.io.File
 import java.io.IOException
@@ -26,7 +26,7 @@ const val APPLICATION_NAME = "VideoManager"
 
 object YoutubeAPI {
     private val SCOPES: Collection<String> = mutableListOf("https://www.googleapis.com/auth/youtube")
-    private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
+    private val JSON_FACTORY: JsonFactory = GsonFactory.getDefaultInstance()
 
     @Throws(IOException::class)
     fun authorize(httpTransport: NetHttpTransport?): Credential? {
@@ -46,7 +46,7 @@ object YoutubeAPI {
                 .setCredentialStore(credentialStore)
                 .setAccessType("offline")
                 .build()
-        val credential = AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize("user")
+        val credential = AuthorizationCodeInstalledApp(flow, LocalServerReceiver()).authorize("e.tabatsky@gmail.com")
         StoredCredential(credential)
         return credential
     }
@@ -74,7 +74,7 @@ object YoutubeAPI {
         getService()?.let { theYoutubeService ->
             // Define and execute the API request
             val request = theYoutubeService.playlists()
-                .list("snippet,contentDetails")
+                .list(listOf("snippet", "contentDetails"))
             val response = request.setMine(true).execute()
             return response.items.map { it.snippet.title }
         } ?: return listOf()
@@ -87,7 +87,7 @@ object YoutubeAPI {
         getService()?.let { theYoutubeService ->
             // Define and execute the API request
             val request = theYoutubeService.playlists()
-                .list("snippet,contentDetails")
+                .list(listOf("snippet", "contentDetails"))
             val response = request.setMine(true).execute()
             response.items.forEach { playlist ->
                 val playlistId = playlist.id
@@ -96,7 +96,7 @@ object YoutubeAPI {
                 if (playlistTitle == playlistNameToFetch) {
                     var nextPageToken: String? = null
                     do {
-                        val request2 = theYoutubeService.playlistItems().list("snippet,contentDetails")
+                        val request2 = theYoutubeService.playlistItems().list(listOf("snippet", "contentDetails"))
                         val response2 = if (nextPageToken == null) {
                             request2.setPlaylistId(playlistId).setMaxResults(50L).execute()
                         } else {
@@ -120,19 +120,20 @@ object YoutubeAPI {
     @Throws(GeneralSecurityException::class, IOException::class, GoogleJsonResponseException::class)
     private fun fetchVideos(videoIds: List<String>): List<YoutubeVideo> {
         val result = arrayListOf<YoutubeVideo>()
-        val videoIdsStr = videoIds.joinToString(",")
 
         getService()?.let { theYoutubeService ->
             var nextPageToken: String? = null
             do {
-                val request = theYoutubeService.Videos().list("snippet,fileDetails")
-                val response = request.setId(videoIdsStr).setMaxResults(50L).setPageToken(nextPageToken).execute()
+                val request = theYoutubeService.Videos().list(listOf("id", "snippet", "fileDetails", "processingDetails"))
+                val response = request.setId(videoIds).setMaxResults(50L).setPageToken(nextPageToken).execute()
 
                 response.items.forEach { video ->
                     val videoId = video.id
                     val videoTitle = video.snippet.title.trim()
-                    val videoFileName = video.fileDetails.fileName
-                    println("video: $videoId; $videoFileName; $videoTitle")
+                    val videoFileName = video.fileDetails?.fileName
+                    val videoCreationTime = video.fileDetails?.creationTime
+                    val avail = video.processingDetails?.fileDetailsAvailability
+                    println("video: $videoId; $avail; $videoFileName; $videoCreationTime; $videoTitle")
                     val youtubeVideo = YoutubeVideo(
                         id = videoId,
                         fileName = videoFileName,
@@ -150,13 +151,13 @@ object YoutubeAPI {
 
     fun updateVideo(videoId: String, newTitle: String) {
         getService()?.let { theYoutubeService ->
-            val request = theYoutubeService.Videos().list("snippet")
-            val response = request.setId(videoId).execute()
+            val request = theYoutubeService.Videos().list(listOf("snippet"))
+            val response = request.setId(listOf(videoId)).execute()
             response.items.firstOrNull()?.let { video ->
                 val title = video.snippet.title
                 println("video: $videoId; $title")
                 video.snippet.title = newTitle
-                val request2 = theYoutubeService.Videos().update("snippet", video)
+                val request2 = theYoutubeService.Videos().update(listOf("snippet"), video)
                 val response2 = request2.execute()
                 println(response2)
             }
@@ -166,6 +167,6 @@ object YoutubeAPI {
 
 data class YoutubeVideo(
     val id: String,
-    val fileName: String,
+    val fileName: String?,
     val title: String
 )
