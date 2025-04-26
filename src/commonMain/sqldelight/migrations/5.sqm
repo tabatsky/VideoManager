@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS videoRenamings
+(oldName TEXT NOT NULL,
+newName TEXT NOT NULL
+);

@@ -23,6 +23,8 @@ class VideoViewModel(
     var folderChooserDialogShowCounter by mutableStateOf(0)
 
     var allVideos by mutableStateOf(listOf<VideoEntry>())
+    var allVideoRenamings by mutableStateOf(mapOf<String, String>())
+    var allVideoReverseRenamings by mutableStateOf(mapOf<String, String>())
 
     var currentVideo: VideoEntry? by mutableStateOf(null)
     var currentVideoUrl by mutableStateOf("")
@@ -106,39 +108,33 @@ class VideoViewModel(
         val result1 = arrayListOf<Pair<YoutubeVideo, String>>()
         val result2 = arrayListOf<Pair<YoutubeVideo, String>>()
         val result3 = arrayListOf<Pair<YoutubeVideo, String>>()
-        val result4 = arrayListOf<Pair<YoutubeVideo, String>>()
 
         val youtubeData = YoutubeAPI.fetchPlaylistVideos(youtubeSelectedPlaylistName)
-        val videoEntryNames = videoRepository.getAllVideos().associate { it.file.name to it.videoName }
+        val videoEntryNames = videoRepository.getAllVideos().associate { it.videoName to it.file.name }
         youtubeData.forEach {
-            val fileName = it.fileName
             val youtubeTitle = it.title
-            if (fileName in videoEntryNames.keys) {
-                val videoName = videoEntryNames[fileName]!!.trim()
-                println("video: $youtubeTitle; $videoName")
-                if (videoName != fileName && videoName != youtubeTitle) {
-                    result1.add(it to videoName)
-                } else if (videoName == youtubeTitle) {
-                    result2.add(it to videoName)
-                } else if (videoName == fileName) { // for clarity, always true
-                    result3.add(it to videoName)
-                }
+            if (youtubeTitle in videoEntryNames.keys) {
+                result1.add(it to youtubeTitle)
+            } else if (youtubeTitle in allVideoReverseRenamings.keys) {
+                val newName = allVideoReverseRenamings[youtubeTitle]!!
+                result2.add(it to newName)
             } else {
-                result4.add(it to "null")
+                result3.add(it to "null")
             }
         }
 
-        val result = result1 + result2 + result3 + result4
-        val result5 = arrayListOf<Pair<YoutubeVideo?, String>>()
+        val result = result1 + result2 + result3
+        val result4 = arrayListOf<Pair<YoutubeVideo?, String>>()
         videoRepository.getAllVideos()
             .filter { it.playlistName == youtubeSelectedPlaylistName }
             .forEach { videoEntry ->
-                if (result.count { it.first.fileName == videoEntry.file.name } == 0) {
-                    result5.add(null to videoEntry.videoName)
+                val oldVideoName = allVideoRenamings[videoEntry.videoName]
+                if (result.count { it.first.title == videoEntry.videoName || it.first.title == oldVideoName } == 0) {
+                    result4.add(null to videoEntry.videoName)
                 }
             }
 
-        return result5 + result
+        return result4 + result
     }
 
     private fun makeThumbnails() {
@@ -154,28 +150,49 @@ class VideoViewModel(
         println("all thumbnails loaded")
     }
 
-    fun onDbUpgraded(onSuccess: () -> Unit) {
-        coroutineScope.launch {
-            withContext(Dispatchers.Main) {
-                val allVideosFromDB = videoRepository.getAllVideos()
-                var index = 0
-                allVideosFromDB.sortedBy { it.file.absolutePath }.forEach { videoEntry ->
-                    val newVideoEntry = withContext(Dispatchers.IO) {
-                        videoEntry.file
-                            .toVideoEntry(videoEntry.playlistName)
-                            .copy(id = videoEntry.id)
+    fun onDbUpgraded(newVersion: Int, onSuccess: () -> Unit) {
+        if (newVersion < 6) {
+            coroutineScope.launch {
+                withContext(Dispatchers.Main) {
+                    val allVideosFromDB = videoRepository.getAllVideos()
+                    var index = 0
+                    allVideosFromDB.sortedBy { it.file.absolutePath }.forEach { videoEntry ->
+                        val newVideoEntry = withContext(Dispatchers.IO) {
+                            videoEntry.file
+                                .toVideoEntry(videoEntry.playlistName)
+                                .copy(id = videoEntry.id)
+                        }
+                        if (newVideoEntry.recorded.year() > 2012) {
+                            videoRepository.updateVideoRecordedDate(newVideoEntry)
+                        }
+                        videoRepository.updateVideoCrc32(newVideoEntry)
+                        println("updated: ${index + 1} of ${allVideosFromDB.size}")
+                        index += 1
+                        updateAllVideos()
                     }
-                    if (newVideoEntry.recorded.year() > 2012) {
-                        videoRepository.updateVideoRecordedDate(newVideoEntry)
-                    }
-                    videoRepository.updateVideoCrc32(newVideoEntry)
-                    println("updated: ${index + 1} of ${allVideosFromDB.size}")
-                    index += 1
-                    updateAllVideos()
+                    println("updated: all")
+                    Injector.confirmDbUpgrade()
+                    onSuccess()
                 }
-                println("updated: all")
-                Injector.confirmDbUpgrade()
-                onSuccess()
+            }
+        } else if (newVersion == 6) {
+            coroutineScope.launch {
+                withContext(Dispatchers.Main) {
+                    val allVideosFromDB = videoRepository.getAllVideos()
+                    allVideosFromDB.forEach { videoEntry ->
+                        val oldName = videoEntry.file.name
+                            .split(".")
+                            .first()
+                            .replace("_", " ")
+                            .replace("-", " ")
+                        videoRepository.addVideoRenaming(oldName, videoEntry.videoName)
+                    }
+                    videoRepository.getAllVideoRenamings().forEach { s, s2 ->
+                        println("$s $s2")
+                    }
+                    Injector.confirmDbUpgrade()
+                    onSuccess()
+                }
             }
         }
     }
@@ -231,6 +248,8 @@ class VideoViewModel(
 
     private fun updateAllVideos() {
         allVideos = videoRepository.getAllVideos()
+        allVideoRenamings = videoRepository.getAllVideoRenamings()
+        allVideoReverseRenamings = videoRepository.getAllVideoReverseRenamings()
     }
 
     fun playVideoEntry(videoEntry: VideoEntry) {
@@ -259,6 +278,16 @@ class VideoViewModel(
             )
             videoRepository.updateVideoNameAndComment(newVideoEntry)
             videoRepository.updateVideoRecordedDate(newVideoEntry)
+            val oldName = if (allVideoRenamings.containsKey(it.videoName)) {
+                it.videoName
+            } else {
+                it.file.name
+                    .split(".")
+                    .first()
+                    .replace("_", " ")
+                    .replace("-", " ")
+            }
+            videoRepository.addVideoRenaming(oldName, newVideoName)
             updateAllVideos()
             currentVideo = newVideoEntry
         }

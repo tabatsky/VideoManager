@@ -18,7 +18,7 @@ class Injector(
     private val viewModel = VideoViewModel(videoRepository, settings, coroutineScope).also {
         if (databaseDriverFactory.wasUpgraded) {
             println("db was upgraded")
-            it.onDbUpgraded { it.onAppStart() }
+            it.onDbUpgraded(databaseDriverFactory.version) { it.onAppStart() }
         } else {
             it.onAppStart()
         }

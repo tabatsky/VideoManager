@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS videoRenamings
+(oldName TEXT NOT NULL,
+newName TEXT NOT NULL
+);
+
+selectAll:
+SELECT * FROM videoRenamings ORDER BY newName;
+
+insertRenaming:
+INSERT INTO videoRenamings (oldName, newName) VALUES (?, ?);

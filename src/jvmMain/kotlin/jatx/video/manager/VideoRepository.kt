@@ -77,4 +77,21 @@ class VideoRepository(
     fun renamePlaylist(oldName: String, newName: String) = appDatabase
         .videoEntityQueries
         .renamePlaylist(newName, oldName)
+
+
+    fun getAllVideoRenamings() = appDatabase
+        .videoRenamingsQueries
+        .selectAll()
+        .executeAsList()
+        .associate { it.newName to it.oldName }
+
+    fun getAllVideoReverseRenamings() = appDatabase
+        .videoRenamingsQueries
+        .selectAll()
+        .executeAsList()
+        .associate { it.oldName to it.newName }
+
+    fun addVideoRenaming(oldName: String, newName: String) = appDatabase
+        .videoRenamingsQueries
+        .insertRenaming(oldName, newName)
 }

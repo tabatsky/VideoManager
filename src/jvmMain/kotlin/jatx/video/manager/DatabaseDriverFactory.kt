@@ -8,6 +8,7 @@ const val dbFile = "VideoManager.db"
 
 class DatabaseDriverFactory {
     var wasUpgraded = false
+    var version = 0
 
     fun createDriver(): JdbcSqliteDriver {
         val driver = JdbcSqliteDriver("jdbc:sqlite:$dbFile")
@@ -22,16 +23,16 @@ class DatabaseDriverFactory {
                 .getLong(0)
                 ?.toInt() ?: 0
 
-            val newVersion = AppDatabase.Schema.version
-            println("old version: $oldVersion; new version: $newVersion")
-            if (newVersion > oldVersion) {
+            version = AppDatabase.Schema.version
+            println("old version: $oldVersion; new version: $version")
+            if (version > oldVersion) {
                 wasUpgraded = true
             }
             try {
                 AppDatabase.Schema.migrate(
                     driver = driver,
                     oldVersion = oldVersion,
-                    newVersion = newVersion
+                    newVersion = version
                 )
             } catch (t: Throwable) {
                 t.printStackTrace()
