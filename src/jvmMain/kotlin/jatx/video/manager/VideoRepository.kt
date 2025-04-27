@@ -83,13 +83,17 @@ class VideoRepository(
         .videoRenamingsQueries
         .selectAll()
         .executeAsList()
-        .associate { it.newName to it.oldName }
+        .groupBy { it.newName }
+        .map { it.key to it.value.map { it.oldName } }
+        .toMap()
 
     fun getAllVideoReverseRenamings() = appDatabase
         .videoRenamingsQueries
         .selectAll()
         .executeAsList()
-        .associate { it.oldName to it.newName }
+        .groupBy { it.oldName }
+        .map { it.key to it.value.map { it.newName } }
+        .toMap()
 
     fun addVideoRenaming(oldName: String, newName: String) = appDatabase
         .videoRenamingsQueries

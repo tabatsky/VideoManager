@@ -23,8 +23,8 @@ class VideoViewModel(
     var folderChooserDialogShowCounter by mutableStateOf(0)
 
     var allVideos by mutableStateOf(listOf<VideoEntry>())
-    var allVideoRenamings by mutableStateOf(mapOf<String, String>())
-    var allVideoReverseRenamings by mutableStateOf(mapOf<String, String>())
+    var allVideoRenamings by mutableStateOf(mapOf<String, List<String>>())
+    var allVideoReverseRenamings by mutableStateOf(mapOf<String, List<String>>())
 
     var currentVideo: VideoEntry? by mutableStateOf(null)
     var currentVideoUrl by mutableStateOf("")
@@ -116,8 +116,8 @@ class VideoViewModel(
             if (youtubeTitle in videoEntryNames.keys) {
                 result1.add(it to youtubeTitle)
             } else if (youtubeTitle in allVideoReverseRenamings.keys) {
-                val newName = allVideoReverseRenamings[youtubeTitle]!!
-                result2.add(it to newName)
+                val newName = getLatestVideoName(youtubeTitle)
+                result2.add(it to (newName ?: "null"))
             } else {
                 result3.add(it to "null")
             }
@@ -128,8 +128,8 @@ class VideoViewModel(
         videoRepository.getAllVideos()
             .filter { it.playlistName == youtubeSelectedPlaylistName }
             .forEach { videoEntry ->
-                val oldVideoName = allVideoRenamings[videoEntry.videoName]
-                if (result.count { it.first.title == videoEntry.videoName || it.first.title == oldVideoName } == 0) {
+                val videoNameHistory = getVideoNameHistory(videoEntry.videoName)
+                if (result.count { it.first.title in videoNameHistory } == 0) {
                     result4.add(null to videoEntry.videoName)
                 }
             }
@@ -187,8 +187,8 @@ class VideoViewModel(
                             .replace("-", " ")
                         videoRepository.addVideoRenaming(oldName, videoEntry.videoName)
                     }
-                    videoRepository.getAllVideoRenamings().forEach { s, s2 ->
-                        println("$s $s2")
+                    videoRepository.getAllVideoRenamings().forEach {
+                        println(it)
                     }
                     Injector.confirmDbUpgrade()
                     onSuccess()
@@ -387,5 +387,36 @@ class VideoViewModel(
                 exportButtonEnabled = true
             }
         }
+    }
+
+    private fun getLatestVideoName(youtubeTitle: String): String? {
+        val fullSet = hashSetOf(youtubeTitle)
+        var oldSize = 0
+        while (fullSet.size > oldSize) {
+            oldSize = fullSet.size
+            val newNames = fullSet.flatMap {
+                (allVideoReverseRenamings[it] ?: listOf()) + listOf(it)
+            }.toSet()
+            fullSet.addAll(newNames)
+//            println(newNames)
+//            println(fullSet)
+        }
+        val videoNames = allVideos.map { it.videoName }
+        return fullSet.firstOrNull { it in videoNames }
+    }
+
+    private fun getVideoNameHistory(videoName: String): Set<String> {
+        val result = hashSetOf(videoName)
+        var oldSize = 0
+        while (result.size > oldSize) {
+            oldSize = result.size
+            val oldNames = result.flatMap {
+                (allVideoRenamings[it] ?: listOf()) + listOf(it)
+            }.toSet()
+            result.addAll(oldNames)
+//            println(oldNames)
+//            println(result)
+        }
+        return result
     }
 }
