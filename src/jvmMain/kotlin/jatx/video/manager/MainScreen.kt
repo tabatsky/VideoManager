@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import jatx.videomanager.generated.resources.Res
+import jatx.videomanager.generated.resources.ic_pause
+import jatx.videomanager.generated.resources.ic_play
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -21,6 +23,14 @@ import org.jetbrains.compose.resources.painterResource
 fun MainScreen(
     onChooseFolder: () -> Unit
 ) {
+    val filteredEntries = Injector.viewModel.allVideos.toItemEntries(
+        Injector.viewModel.filterText
+    )
+    println("filtered: ${filteredEntries.size}")
+    filteredEntries.forEach {
+        println(it)
+    }
+
     BoxWithConstraints (
         modifier = Modifier
             .fillMaxSize()
@@ -62,7 +72,7 @@ fun MainScreen(
                 ControlsAndInfoRow()
             }
 
-            VideoListColumn()
+            VideoListColumn(filteredEntries)
         }
     }
 }
@@ -179,13 +189,14 @@ private fun ColumnScope.ControlsAndInfoRow() {
             .width(160.dp)
             .padding(10.dp)
         ) {
-            Text("Подробнее")
+            Text("РџРѕРґСЂРѕР±РЅРµРµ")
         }
     }
 }
 
 @Composable
-private fun RowScope.VideoListColumn() {
+private fun RowScope.VideoListColumn(entries: List<ItemEntry>) {
+    val videos = entries.filterIsInstance<VideoItemEntry>()
     Column(
         modifier = Modifier
             .fillMaxHeight()
@@ -196,9 +207,7 @@ private fun RowScope.VideoListColumn() {
             modifier = Modifier
                 .weight(1f)
         ) {
-            items(Injector.viewModel.allVideos.toItemEntries(
-                Injector.viewModel.filterText
-            )) { itemEntry ->
+            items(entries) { itemEntry ->
                 when (itemEntry) {
                     is VideoItemEntry -> {
                         VideoItem(itemEntry)
@@ -214,14 +223,24 @@ private fun RowScope.VideoListColumn() {
                 }
             }
         }
-        TextField(
-            value = Injector.viewModel.filterText,
-            onValueChange = {
-                Injector.viewModel.filterText = it
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-        )
+        Row {
+            TextField(
+                value = Injector.viewModel.filterText,
+                onValueChange = {
+                    Injector.viewModel.filterText = it
+                },
+                modifier = Modifier
+                    .weight(4f)
+            )
+            Button(onClick = {
+                Injector.viewModel.showExportPlaylistDialog(true)
+            }, modifier = Modifier
+                .weight(3f)
+                .padding(4.dp)
+            ) {
+                Text("Р­РєСЃРїРѕСЂС‚: ${videos.size}")
+            }
+        }
         Row {
             Button(onClick = {
                 Injector.viewModel.isAddFolderDialogVisible = true
@@ -229,7 +248,7 @@ private fun RowScope.VideoListColumn() {
                 .weight(1f)
                 .padding(4.dp)
             ) {
-                Text("Добавить папку")
+                Text("Р”РѕР±Р°РІРёС‚СЊ РїР°РїРєСѓ")
             }
             Button(onClick = {
                 Injector.viewModel.openYoutubeDialog()

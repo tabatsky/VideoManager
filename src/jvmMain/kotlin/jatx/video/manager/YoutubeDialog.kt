@@ -62,7 +62,7 @@ fun YoutubeDialog() {
                             .width(300.dp)
                             .height(48.dp)
                     ) {
-                        Text(text = "Получить плейлист")
+                        Text(text = "РџРѕР»СѓС‡РёС‚СЊ РїР»РµР№Р»РёСЃС‚")
                     }
                 }
                 LazyColumn {
@@ -117,7 +117,7 @@ fun YoutubeDialog() {
                                     videoName != "null" &&
                                     youtubeTitle != "null"
                             val buttonText = if (videoName.length <= 100) {
-                                "Обновить"
+                                "РћР±РЅРѕРІРёС‚СЊ"
                             } else {
                                 "${videoName.length} / 100"
                             }

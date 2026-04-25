@@ -28,7 +28,7 @@ fun PlaylistRightClickDialog() {
                         onDismiss()
                         Injector.viewModel.showRenamePlaylistDialog()
                     }) {
-                    Text("Переименовать")
+                    Text("РџРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ")
                 }
                 Button(
                     modifier = Modifier
@@ -37,7 +37,7 @@ fun PlaylistRightClickDialog() {
                         onDismiss()
                         Injector.viewModel.showExportPlaylistDialog()
                     }) {
-                    Text("Экспортировать")
+                    Text("Р­РєСЃРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ")
                 }
             }
         }
@@ -67,7 +67,7 @@ fun RenamePlaylistDialog() {
                     onDismiss()
                     Injector.viewModel.applyNewPlaylistName()
                 }) {
-                    Text("Применить")
+                    Text("РџСЂРёРјРµРЅРёС‚СЊ")
                 }
             }
         }
@@ -115,10 +115,14 @@ fun ExportPlaylistDialog(
                         .fillMaxWidth(),
                     enabled = Injector.viewModel.exportButtonEnabled,
                     onClick = {
-                        Injector.viewModel.exportPlaylistToFolder()
+                        if (Injector.viewModel.isExportFilteredMode) {
+                            Injector.viewModel.exportFilteredVideosToFolder()
+                        } else {
+                            Injector.viewModel.exportPlaylistToFolder()
+                        }
                     }
                 ) {
-                    Text("Экспортировать")
+                    Text("Р­РєСЃРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ")
                 }
             }
         }

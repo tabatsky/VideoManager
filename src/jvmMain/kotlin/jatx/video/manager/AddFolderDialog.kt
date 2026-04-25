@@ -48,7 +48,7 @@ fun AddFolderDialog(
                 }
                 Row {
                     Text(
-                        "Найдено видео в папке: ${Injector.viewModel.folderVideoCount}",
+                        "РќР°Р№РґРµРЅРѕ РІРёРґРµРѕ РІ РїР°РїРєРµ: ${Injector.viewModel.folderVideoCount}",
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                     )
@@ -65,7 +65,7 @@ fun AddFolderDialog(
                         }, modifier = Modifier
                             .width(180.dp)
                     ) {
-                        Text("Добавить",
+                        Text("Р”РѕР±Р°РІРёС‚СЊ",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                         )
@@ -76,7 +76,7 @@ fun AddFolderDialog(
                         }, modifier = Modifier
                             .width(180.dp)
                     ) {
-                        Text("Отмена",
+                        Text("РћС‚РјРµРЅР°",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                         )

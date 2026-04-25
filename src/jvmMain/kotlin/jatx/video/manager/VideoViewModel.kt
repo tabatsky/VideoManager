@@ -56,6 +56,7 @@ class VideoViewModel(
     var isPlaylistRightClickDialogVisible by mutableStateOf(false)
     var isRenamePlaylistDialogVisible by mutableStateOf(false)
     var isExportPlaylistDialogVisible by mutableStateOf(false)
+    var isExportFilteredMode by mutableStateOf(false)
     var newPlaylistName by mutableStateOf("")
     var rightClickPlaylistName by mutableStateOf("")
 
@@ -353,8 +354,9 @@ class VideoViewModel(
         isRenamePlaylistDialogVisible = true
     }
 
-    fun showExportPlaylistDialog() {
+    fun showExportPlaylistDialog(filteredMode: Boolean = false) {
         isExportPlaylistDialogVisible = true
+        isExportFilteredMode = filteredMode
     }
 
     fun applyNewPlaylistName() {
@@ -377,6 +379,33 @@ class VideoViewModel(
                 var done = 0
 
                 playlistVideos.forEach {
+                    val fileName = it.file.name
+                    val outFile = File(outDir, fileName)
+                    it.file.copyTo(outFile, overwrite = true)
+                    done += 1
+                    exportProgress = 1f * done / count
+                }
+
+                exportButtonEnabled = true
+            }
+        }
+    }
+
+    fun exportFilteredVideosToFolder() {
+        val filteredVideos = allVideos.filter {
+            it.videoName.contains(filterText.trim(), ignoreCase = true)
+        }
+        val count = filteredVideos.size
+        val outDir = File(folderPath)
+
+        coroutineScope.launch {
+            withContext(Dispatchers.IO) {
+                exportButtonEnabled = false
+                exportProgress = 0f
+
+                var done = 0
+
+                filteredVideos.forEach {
                     val fileName = it.file.name
                     val outFile = File(outDir, fileName)
                     it.file.copyTo(outFile, overwrite = true)

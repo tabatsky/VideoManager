@@ -35,7 +35,7 @@ fun VideoContentsDialog() {
                     .fillMaxWidth()
             ) {
                 Text(
-                    text = "Файл: ${Injector.viewModel.currentVideo?.file?.absolutePath}",
+                    text = "Р¤Р°Р№Р»: ${Injector.viewModel.currentVideo?.file?.absolutePath}",
                     modifier = Modifier
                         .padding(12.dp)
                 )
@@ -51,13 +51,13 @@ fun VideoContentsDialog() {
                     modifier = Modifier
                         .fillMaxWidth()
                 )
-                val lastModified = Injector.viewModel.currentVideo?.lastModifiedFormatted ?: "неизвестно"
+                val lastModified = Injector.viewModel.currentVideo?.lastModifiedFormatted ?: "РЅРµРёР·РІРµСЃС‚РЅРѕ"
                 Text(
-                    text = "Изменено: $lastModified",
+                    text = "РР·РјРµРЅРµРЅРѕ: $lastModified",
                     modifier = Modifier
                         .padding(12.dp)
                 )
-                val recordedFromEntry = Injector.viewModel.currentVideo?.recordedFormatted ?: "неизвестно"
+                val recordedFromEntry = Injector.viewModel.currentVideo?.recordedFormatted ?: "РЅРµРёР·РІРµСЃС‚РЅРѕ"
                 var recordedTextFieldValue by remember { mutableStateOf(recordedFromEntry) }
                 var isParseError by remember { mutableStateOf(false) }
                 val textFieldBgColor = if (isParseError) Color.Red else Color.White
@@ -67,7 +67,7 @@ fun VideoContentsDialog() {
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = "Записано: ",
+                        text = "Р—Р°РїРёСЃР°РЅРѕ: ",
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                     )
@@ -81,9 +81,9 @@ fun VideoContentsDialog() {
                     )
                 }
                 val duration = Injector.viewModel.currentVideo
-                    ?.duration?.formatDuration(true) ?: "неизвестно"
+                    ?.duration?.formatDuration(true) ?: "РЅРµРёР·РІРµСЃС‚РЅРѕ"
                 Text(
-                    text = "Длительность: $duration",
+                    text = "Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ: $duration",
                     modifier = Modifier
                         .padding(12.dp)
                 )
@@ -105,16 +105,16 @@ fun VideoContentsDialog() {
                             .weight(1f)
                             .padding(10.dp)
                     ) {
-                        Text("Сохранить",
+                        Text("РЎРѕС…СЂР°РЅРёС‚СЊ",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically)
                         )
                     }
 
                     val deleteOrRestoreLabel = if (Injector.viewModel.currentVideo?.deleted == true) {
-                        "Восстановить"
+                        "Р’РѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ"
                     } else {
-                        "Удалить"
+                        "РЈРґР°Р»РёС‚СЊ"
                     }
 
                     Button(onClick = {
@@ -139,9 +139,9 @@ private fun DeleteVideoDialogWrapper(showConfirmationState: MutableState<Boolean
 
     if (showConfirmation) {
         val willBedeletedOrRestoredLabel = if (Injector.viewModel.currentVideo?.deleted == true) {
-            "Видео будет восстановлено"
+            "Р’РёРґРµРѕ Р±СѓРґРµС‚ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРѕ"
         } else {
-            "Видео будет удалено в корзину"
+            "Р’РёРґРµРѕ Р±СѓРґРµС‚ СѓРґР°Р»РµРЅРѕ РІ РєРѕСЂР·РёРЅСѓ"
         }
 
         AlertDialog(
@@ -149,7 +149,7 @@ private fun DeleteVideoDialogWrapper(showConfirmationState: MutableState<Boolean
                 showConfirmation = false
             },
             title = {
-                Text(text = "Вы уверены?")
+                Text(text = "Р’С‹ СѓРІРµСЂРµРЅС‹?")
             },
             text = {
                 Text(text = willBedeletedOrRestoredLabel)
@@ -159,14 +159,14 @@ private fun DeleteVideoDialogWrapper(showConfirmationState: MutableState<Boolean
                     Injector.viewModel.toggleCurrentVideoDeleted()
                     showConfirmation = false
                 }) {
-                    Text(text = "Да")
+                    Text(text = "Р”Р°")
                 }
             },
             dismissButton = {
                 Button(onClick = {
                     showConfirmation = false
                 }) {
-                    Text(text = "Нет")
+                    Text(text = "РќРµС‚")
                 }
             }
         )
