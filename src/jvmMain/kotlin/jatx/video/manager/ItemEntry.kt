@@ -51,7 +51,7 @@ fun List<VideoEntry>.toItemEntries(filterText: String): List<ItemEntry> {
         .asSequence()
         .filter { it.videoName.contains(filterText.trim(), ignoreCase = true) }
         .filter { it.deleted }
-        .groupBy { "Корзина" }
+        .groupBy { "РљРѕСЂР·РёРЅР°" }
         .toList()
         .sortedBy { it.first }
         .flatMap {
